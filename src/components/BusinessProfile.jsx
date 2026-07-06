@@ -18,8 +18,146 @@ export default function BusinessProfile({
   onClose,
   isOpen,
   selectedDistrict,
-  onInjectAnomaly
+  onInjectAnomaly,
+  alerts = []
 }) {
+  const getAIRecommendations = (biz, allAlerts) => {
+    const activeAlerts = allAlerts.filter(a => a.businessId === biz.id);
+    if (activeAlerts.length > 0) {
+      return activeAlerts.map(alert => ({
+        type: "incident",
+        title: `Active Alert: ${alert.type}`,
+        priority: alert.priority,
+        text: alert.recommendation,
+        reason: alert.reason
+      }));
+    }
+    
+    const cat = biz.category;
+    const items = [];
+    
+    if (cat === "IT Companies") {
+      items.push({
+        type: "proactive",
+        title: "Proactive Edge CDN Optimization",
+        priority: "ADVISORY",
+        text: "Enable regional edge routing and static CDN caching to reduce client virtual DOM handshakes latency by 35ms."
+      });
+      items.push({
+        type: "proactive",
+        title: "K8s Microservice Scaling Insights",
+        priority: "ADVISORY",
+        text: "Scale down GraphQL gateway pod replicas by 30% between 12:00 AM and 05:00 AM (non-peak) to reduce idle cloud expenditure."
+      });
+    } else if (cat === "Hospitals" || cat === "Healthcare") {
+      items.push({
+        type: "proactive",
+        title: "ICU IoT Monitor Calibration Check",
+        priority: "ADVISORY",
+        text: "Calibrate bedside IoT wireless telemetry monitors weekly to prevent noise spike alerts from corrupting spark sliding windows."
+      });
+      items.push({
+        type: "proactive",
+        title: "Predictive Ward Staff Scheduling",
+        priority: "ADVISORY",
+        text: "Weekend occupancy is forecasted to rise by 15%. Recommend scaling nursing shift slots by 10% to preserve quality indices."
+      });
+    } else if (cat === "Hotels" || cat === "Restaurants") {
+      items.push({
+        type: "proactive",
+        title: "Weekend Demand Pricing Insights",
+        priority: "ADVISORY",
+        text: "Promote seasonal menu bundles on review portals during Friday-Sunday peak hours to boost average transaction value by 12%."
+      });
+      items.push({
+        type: "proactive",
+        title: "Local Supply Buffer Adjustment",
+        priority: "ADVISORY",
+        text: "Increase fresh ingredient procurement volumes by 20% ahead of next week's district festival demand spikes."
+      });
+    } else if (cat === "Manufacturing") {
+      items.push({
+        type: "proactive",
+        title: "Preventive Conveyor Mechanical Check",
+        priority: "ADVISORY",
+        text: "Vibration sensors on line 3 indicate minor mechanical drift. Schedule conveyor lubrication to avoid safety shutdowns."
+      });
+      items.push({
+        type: "proactive",
+        title: "IoT Node Battery Alert",
+        priority: "ADVISORY",
+        text: "Vibration sensor node M-4 telemetry reporting low voltage (2.6V). Schedule routine battery swap before telemetry drop."
+      });
+    } else if (cat === "Textile Industries") {
+      items.push({
+        type: "proactive",
+        title: "Humidity Tuning Guidelines",
+        priority: "ADVISORY",
+        text: "Keep loom hall relative humidity steady at 65% to reduce organic cotton thread friction and breakage rates by 8%."
+      });
+      items.push({
+        type: "proactive",
+        title: "Raw Silk Batch Tracking Log",
+        priority: "ADVISORY",
+        text: "Sync raw yarn warehouse temperature registers with digital twins to verify compliance audits."
+      });
+    } else if (cat === "Automobile") {
+      items.push({
+        type: "proactive",
+        title: "Paint-Shop Thermal Offset Sync",
+        priority: "ADVISORY",
+        text: "Diagnostic scanning of paint-shop drying ovens reveals a +2°C offset. Adjust controller coefficients to match standard twin models."
+      });
+      items.push({
+        type: "proactive",
+        title: "Robotic Assembly Torque Diagnostic",
+        priority: "ADVISORY",
+        text: "Robot Arm R-12 joints report normal torque metrics (45 Nm). Next diagnostics due in 45 operational hours."
+      });
+    } else if (cat === "Retail") {
+      items.push({
+        type: "proactive",
+        title: "Dynamic Promo Campaign",
+        priority: "ADVISORY",
+        text: "Launch weekend clearance app notifications on low-movement inventory items to speed up inventory turns."
+      });
+      items.push({
+        type: "proactive",
+        title: "Evening Footfall Staffing Match",
+        priority: "ADVISORY",
+        text: "Customer checkout queues peak between 6:00 PM - 8:30 PM. Add 1 additional cashier station to keep wait times under 3 minutes."
+      });
+    } else if (cat === "Logistics") {
+      items.push({
+        type: "proactive",
+        title: "Carrier Route Geo-Fencing Advice",
+        priority: "ADVISORY",
+        text: "Re-route Chennai-bound cargo trucks via outer bypass routes to save 45 minutes of transit delays."
+      });
+      items.push({
+        type: "proactive",
+        title: "Cold Chain Temperature Validation",
+        priority: "ADVISORY",
+        text: "Refrigerated transport fleet sensor diagnostics show normal range (2.4°C). Alert system remains on standby."
+      });
+    } else {
+      items.push({
+        type: "proactive",
+        title: "TLS Port Security Audit",
+        priority: "ADVISORY",
+        text: "Secure all incoming REST telemetry connections on port 443 with TLS 1.3 to meet compliance regulations."
+      });
+      items.push({
+        type: "proactive",
+        title: "Operational Cost Benchmarks",
+        priority: "ADVISORY",
+        text: "Review competitor marketing spend and adjust regional advertising bid margins to sustain market shares."
+      });
+    }
+    
+    return items;
+  };
+
   const [activeTab, setActiveTab] = useState("overview"); // overview, analytics, timeline, social
 
   // Keyboard shortcut listener to close the drawer with ESC key
@@ -197,6 +335,14 @@ export default function BusinessProfile({
                   <span style={{ fontSize: "10.5px", color: "var(--text-muted)", display: "block" }}>Reg Registration No</span>
                   <span style={{ fontSize: "13px", fontWeight: "600", fontFamily: "var(--font-mono)" }}>{business.registrationNo}</span>
                 </div>
+                <div>
+                  <span style={{ fontSize: "10.5px", color: "var(--text-muted)", display: "block" }}>Phone Contact</span>
+                  <span style={{ fontSize: "13px", fontWeight: "600" }}>{business.phone || "+91 94440 12345"}</span>
+                </div>
+                <div>
+                  <span style={{ fontSize: "10.5px", color: "var(--text-muted)", display: "block" }}>Email Address</span>
+                  <span style={{ fontSize: "13px", fontWeight: "600", wordBreak: "break-all" }}>{business.email || "contact@twin.com"}</span>
+                </div>
                 <div style={{ gridColumn: "span 2" }}>
                   <span style={{ fontSize: "10.5px", color: "var(--text-muted)", display: "block" }}>Physical Address</span>
                   <span style={{ fontSize: "12.5px", fontWeight: "600", color: "var(--text-secondary)" }}>{business.address}</span>
@@ -251,6 +397,45 @@ export default function BusinessProfile({
                       <span>{(business.sentimentScore * 100).toFixed(0)}% Satisfactory</span>
                     </span>
                   </div>
+                </div>
+              </div>
+
+              {/* AI Recommendations Card */}
+              <div className="card" style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                <span style={{ fontSize: "13px", fontWeight: "700", color: "var(--primary)", display: "flex", alignItems: "center", gap: "6px" }}>
+                  ✨ AI Digital Twin Recommendations
+                </span>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {getAIRecommendations(business, alerts).map((rec, rIdx) => {
+                    const isIncident = rec.type === "incident";
+                    const bg = isIncident ? "rgba(239, 68, 68, 0.1)" : "var(--primary-light)";
+                    const border = isIncident ? "1px solid rgba(239, 68, 68, 0.2)" : "1px solid var(--border-color)";
+                    const titleColor = isIncident ? "var(--color-red)" : "var(--primary)";
+                    
+                    return (
+                      <div key={rIdx} style={{ padding: "10px", borderRadius: "8px", backgroundColor: bg, border }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                          <strong style={{ fontSize: "12px", color: titleColor }}>{rec.title}</strong>
+                          <span style={{ 
+                            fontSize: "9px", 
+                            fontWeight: "700", 
+                            backgroundColor: isIncident ? "var(--color-red)" : "var(--primary)", 
+                            color: "white", 
+                            padding: "1px 4px", 
+                            borderRadius: "3px" 
+                          }}>
+                            {rec.priority}
+                          </span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: "11.5px", lineHeight: "1.4", color: "var(--text-secondary)" }}>{rec.text}</p>
+                        {rec.reason && (
+                          <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "4px", fontStyle: "italic" }}>
+                            Reason: {rec.reason}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

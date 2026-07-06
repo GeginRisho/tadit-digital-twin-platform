@@ -1,5 +1,5 @@
 // SimulationEngine.js - Handles real-time event generation and simulated processing streams.
-import { mockBusinesses, projectCoordinates } from "../data/mockBusinesses";
+import { mockBusinesses, projectCoordinates, officialDistricts } from "../data/mockBusinesses";
 
 class SimulationEngine {
   constructor() {
@@ -68,6 +68,7 @@ class SimulationEngine {
       }
     ];
     this.executionHistory = [];
+    this.seedMockBusinessesForEmptyDistricts();
     this.initializeDistrictStats();
   }
 
@@ -181,6 +182,7 @@ class SimulationEngine {
     if (!biz) return false;
 
     this.businesses = this.businesses.filter(b => b.id !== id);
+    this.seedMockBusinessesForEmptyDistricts();
     this.initializeDistrictStats();
     this.addLog("Broker Service", `Business twin de-registered: ${biz.name}`, "warning");
     
@@ -245,7 +247,10 @@ class SimulationEngine {
       this.executionHistory.unshift({
         id: `exec-${Date.now()}`,
         businessName: alert.businessName,
+        planName: `Plan: ${alert.type} Mitigation Playbook`,
         action: alert.recommendation,
+        outcome: "Telemetry metrics normalized.",
+        resolutionTime: "1.2s",
         status: "SUCCESS",
         timestamp: new Date().toLocaleTimeString()
       });
@@ -282,8 +287,102 @@ class SimulationEngine {
     });
   }
 
+  seedMockBusinessesForEmptyDistricts() {
+    const districtsWithBiz = new Set(this.businesses.map(b => b.district));
+    
+    officialDistricts.forEach((dist, distIdx) => {
+      if (!districtsWithBiz.has(dist.name)) {
+        for (let bizIdx = 0; bizIdx < 2; bizIdx++) {
+          const id = `biz-seeded-${distIdx}-${bizIdx}-${Date.now()}`;
+          const category = ["Retail", "Manufacturing", "Hotels", "IT Companies"][(distIdx + bizIdx) % 4];
+          const name = `TN Seeded ${category} Twin (${dist.name})`;
+          const owner = "State Seeder Service";
+          
+          const latOffset = (bizIdx === 0 ? 0.02 : -0.02);
+          const lngOffset = (bizIdx === 0 ? -0.02 : 0.02);
+          const bizLat = Number((dist.lat + latOffset).toFixed(4));
+          const bizLng = Number((dist.lng + lngOffset).toFixed(4));
+          const proj = projectCoordinates(bizLat, bizLng);
+          
+          const baseHealth = 85 + (bizIdx * 5);
+          const baseRating = 4.2;
+          const sentiment = 0.82;
+          const finalPincode = dist.pincode;
+          
+          const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+          const history = months.map(month => ({
+            month,
+            health: baseHealth,
+            rating: baseRating,
+            sentiment,
+            event: "Operational baseline seeded.",
+            type: "normal"
+          }));
+          
+          const newBiz = {
+            id,
+            name,
+            owner,
+            category,
+            baseRevenue: 250,
+            address: `Seeded Industrial Complex, ${dist.hq}, ${dist.name} - ${finalPincode}`,
+            district: dist.name,
+            pincode: finalPincode,
+            coordinates: { lat: bizLat, lng: bizLng, x: proj.x, y: proj.y },
+            phone: `+91 94440 00000`,
+            email: `contact@seeded-${dist.name.toLowerCase().replace(/[^a-z]/g, "")}.com`,
+            website: `www.seeded-${dist.name.toLowerCase().replace(/[^a-z]/g, "")}.com`,
+            gstNumber: `33SEEDB${1000 + distIdx * 2 + bizIdx}D1Z0`,
+            registrationNo: `REG-SEED-${dist.name.substring(0, 3).toUpperCase()}-${1000 + bizIdx}`,
+            googleMapsLink: `https://www.google.com/maps/search/?api=1&query=${bizLat},${bizLng}`,
+            openingHours: "09:00 AM - 06:00 PM",
+            description: `Seeded sample twin node representing regional enterprise health inside ${dist.name} administrative zone.`,
+            baseRating,
+            currentRating: baseRating,
+            baseHealth,
+            currentHealth: baseHealth,
+            sentimentScore: sentiment,
+            trend: "stable",
+            riskLevel: "low",
+            competitors: [
+              { id: `comp-${id}-1`, name: "Seeded Rival Delta", distance: "2.1 km", rating: 4.0, marketShare: 25 },
+              { id: `comp-${id}-2`, name: "Seeded Rival Gamma", distance: "3.5 km", rating: 3.8, marketShare: 15 }
+            ],
+            history,
+            reviews: [
+              { id: `rev-${id}-1`, source: "System", author: "Auditing Service", rating: 4, text: "Seeded node functional and streaming telemetry metrics.", timestamp: "1 day ago" }
+            ],
+            socialPosts: [
+              { id: `post-${id}-1`, author: "@tn_seeder", content: "Seeding complete for district digital twin coverage. #digitaltwin #seeding", likes: 15, timestamp: "1 day ago" }
+            ],
+            gallery: [
+              `https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&q=80`,
+              `https://images.unsplash.com/photo-1554469384-e58fac16e23a?w=400&q=80`,
+              `https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80`
+            ]
+          };
+          this.businesses.push(newBiz);
+        }
+      }
+    });
+  }
+
   initializeDistrictStats() {
     const districts = {};
+    
+    officialDistricts.forEach((d) => {
+      districts[d.name] = {
+        count: 0,
+        totalHealth: 0,
+        totalRevenue: 0,
+        totalSentiment: 0,
+        crises: 0,
+        averageHealth: 0,
+        revenue: 0,
+        sentiment: 0.0
+      };
+    });
+
     this.businesses.forEach((biz) => {
       if (!districts[biz.district]) {
         districts[biz.district] = { 
@@ -291,7 +390,10 @@ class SimulationEngine {
           totalHealth: 0, 
           totalRevenue: 0, 
           totalSentiment: 0, 
-          crises: 0 
+          crises: 0,
+          averageHealth: 0,
+          revenue: 0,
+          sentiment: 0.0
         };
       }
       const baseRev = biz.baseRevenue || 210;
@@ -307,9 +409,15 @@ class SimulationEngine {
     });
     // Calculate averages
     Object.keys(districts).forEach((key) => {
-      districts[key].averageHealth = Math.round(districts[key].totalHealth / districts[key].count);
-      districts[key].revenue = districts[key].totalRevenue;
-      districts[key].sentiment = Number((districts[key].totalSentiment / districts[key].count).toFixed(2));
+      if (districts[key].count > 0) {
+        districts[key].averageHealth = Math.round(districts[key].totalHealth / districts[key].count);
+        districts[key].revenue = districts[key].totalRevenue;
+        districts[key].sentiment = Number((districts[key].totalSentiment / districts[key].count).toFixed(2));
+      } else {
+        districts[key].averageHealth = 0;
+        districts[key].revenue = 0;
+        districts[key].sentiment = 0.0;
+      }
     });
     this.districtStats = districts;
   }

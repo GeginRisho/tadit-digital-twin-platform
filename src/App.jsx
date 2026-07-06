@@ -106,6 +106,21 @@ export default function App() {
   const [alerts, setAlerts] = useState(() => engine.getAlerts());
   const [executionHistory, setExecutionHistory] = useState(() => engine.getExecutionHistory());
 
+  // Automatically select the first business in the clicked district for timeline/rec sync
+  useEffect(() => {
+    if (selectedDistrict) {
+      const districtBiz = businesses.filter(b => b.district === selectedDistrict);
+      if (districtBiz.length > 0) {
+        const currentBiz = businesses.find(b => b.id === selectedBusinessId);
+        if (!currentBiz || currentBiz.district !== selectedDistrict) {
+          setSelectedBusinessId(districtBiz[0].id);
+        }
+      } else {
+        setSelectedBusinessId(null);
+      }
+    }
+  }, [selectedDistrict, businesses, selectedBusinessId]);
+
   // Ingestion metrics
   const [kafkaQueue, setKafkaQueue] = useState([]);
   const [sparkWindow, setSparkWindow] = useState([]);
@@ -382,21 +397,25 @@ export default function App() {
 
   // Dashboard overall KPIs stats
   const kpiStats = useMemo(() => {
-    const totalCount = businesses.length;
+    const filteredByDistrict = selectedDistrict
+      ? businesses.filter(b => b.district === selectedDistrict)
+      : businesses;
+
+    const totalCount = filteredByDistrict.length;
     if (totalCount === 0) {
       return { total: 0, healthy: 0, warning: 0, critical: 0, avgHealth: 0, avgSentiment: 0, totalRevenue: 0 };
     }
-    const healthy = businesses.filter(b => b.currentHealth >= 85).length;
-    const warning = businesses.filter(b => b.currentHealth >= 75 && b.currentHealth < 85).length;
-    const critical = businesses.filter(b => b.currentHealth < 75).length;
+    const healthy = filteredByDistrict.filter(b => b.currentHealth >= 85).length;
+    const warning = filteredByDistrict.filter(b => b.currentHealth >= 75 && b.currentHealth < 85).length;
+    const critical = filteredByDistrict.filter(b => b.currentHealth < 75).length;
     
-    const sumHealth = businesses.reduce((acc, b) => acc + b.currentHealth, 0);
+    const sumHealth = filteredByDistrict.reduce((acc, b) => acc + b.currentHealth, 0);
     const avgHealth = Math.round(sumHealth / totalCount);
     
-    const sumSentiment = businesses.reduce((acc, b) => acc + b.sentimentScore, 0);
+    const sumSentiment = filteredByDistrict.reduce((acc, b) => acc + b.sentimentScore, 0);
     const avgSentiment = Number((sumSentiment / totalCount).toFixed(2));
     
-    const totalRevenue = businesses.reduce((acc, b) => acc + Math.round((b.baseRevenue || 210) * (b.currentHealth / 100)), 0);
+    const totalRevenue = filteredByDistrict.reduce((acc, b) => acc + Math.round((b.baseRevenue || 210) * (b.currentHealth / 100)), 0);
     
     return {
       total: totalCount,
@@ -407,7 +426,7 @@ export default function App() {
       avgSentiment,
       totalRevenue
     };
-  }, [businesses]);
+  }, [businesses, selectedDistrict]);
 
   const searchInputRef = useRef(null);
 
@@ -457,7 +476,7 @@ export default function App() {
   useEffect(() => {
     const handleStateUpdate = (state) => {
       setBusinesses([...state.businesses]);
-      setDistrictStats({ ...state.districtStats });
+      setDistrictStats({ ...state.activeDistrictStats });
       setNotifications([...state.notifications]);
       setAlerts([...state.alerts]);
       setExecutionHistory([...state.executionHistory]);
@@ -605,8 +624,10 @@ export default function App() {
         (b.phone && b.phone.toLowerCase().includes(query)) ||
         (b.email && b.email.toLowerCase().includes(query));
 
-      // 2. Matches dropdown filters
-      const matchesDistrict = filterDistrict === "all" || b.district === filterDistrict;
+      // 2. Matches dropdown filters (overridden by map's selectedDistrict if set)
+      const matchesDistrict = selectedDistrict
+        ? b.district === selectedDistrict
+        : (filterDistrict === "all" || b.district === filterDistrict);
       const matchesCategory = filterCategory === "all" || b.category === filterCategory;
       const matchesRisk = filterRisk === "all" || b.riskLevel === filterRisk;
       
@@ -617,7 +638,7 @@ export default function App() {
 
       return matchesSearch && matchesDistrict && matchesCategory && matchesRisk && matchesHealth;
     });
-  }, [businesses, globalSearch, filterDistrict, filterCategory, filterRisk, filterHealth]);
+  }, [businesses, globalSearch, filterDistrict, filterCategory, filterRisk, filterHealth, selectedDistrict]);
 
   // Chart Labels selector based on active period
   const chartLabels = useMemo(() => {
@@ -1499,8 +1520,10 @@ export default function App() {
                 selectedDistrict={selectedDistrict}
                 onSelectDistrict={setSelectedDistrict}
                 onSelectBusinessId={setSelectedBusinessId}
+                onSelectBusiness={handleSelectBusiness}
                 districtStats={districtStats}
                 businesses={businesses}
+                alerts={alerts}
               />
               
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -2499,6 +2522,7 @@ export default function App() {
         onClose={() => setIsDrawerOpen(false)}
         selectedDistrict={selectedDistrict}
         onInjectAnomaly={handleInjectAnomaly}
+        alerts={alerts}
       />
 
       {/* Form Modal for Add / Edit Business */}
