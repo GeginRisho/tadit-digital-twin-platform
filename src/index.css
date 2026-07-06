@@ -1020,3 +1020,196 @@ select,
   height: calc(100vh - 120px) !important;
   max-height: none !important;
 }
+
+/* --- RESPONSIVE IMPROVEMENTS --- */
+
+html {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.map-grid-container {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+}
+
+.mgt-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-subgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.mgt-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+/* 1. Viewports below 1024px (Tablets & Mobile) */
+@media (max-width: 1024px) {
+  /* Prevent horizontal scroll */
+  body, .app-container {
+    overflow-x: hidden !important;
+    max-width: 100vw;
+  }
+
+  /* Hamburger Menu controls */
+  .mobile-hamburger-btn {
+    display: flex !important;
+  }
+
+  /* Left Sidebar overlay slide drawer */
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
+    width: 280px !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 2000 !important;
+    box-shadow: var(--shadow-premium) !important;
+  }
+  .sidebar.open {
+    transform: translateX(0) !important;
+  }
+  .sidebar.collapsed {
+    width: 280px !important;
+  }
+
+  .sidebar-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: rgba(9, 13, 22, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    z-index: 1999 !important;
+  }
+
+  /* Stacking major grid areas */
+  .map-grid-container {
+    grid-template-columns: 1fr !important;
+  }
+  .map-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .comparison-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Padding and layout refinements */
+  .main-wrapper {
+    padding: 20px !important;
+    gap: 20px !important;
+  }
+  .card {
+    padding: 20px !important;
+  }
+}
+
+/* 2. Viewports below 768px (Mobile) */
+@media (max-width: 768px) {
+  /* Forms stacking */
+  .mgt-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .form-subgrid {
+    grid-template-columns: 1fr !important;
+  }
+  .mgt-metrics-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Touch-friendly buttons (minimum 44px height for interactive items) */
+  button,
+  input[type="text"],
+  input[type="number"],
+  input[type="search"],
+  select,
+  textarea,
+  .btn-playback,
+  .profile-dropdown-item {
+    min-height: 44px !important;
+  }
+
+  /* Table overflow scrolling */
+  .table-responsive-wrapper {
+    overflow-x: auto !important;
+    width: 100% !important;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+  }
+  .table-responsive-wrapper table {
+    min-width: 600px; /* Ensure table fields have enough space to not look squished */
+  }
+
+  /* Spacing breathe rules */
+  .main-wrapper {
+    padding: 16px !important;
+    gap: 16px !important;
+  }
+  .card {
+    padding: 16px !important;
+  }
+
+  /* Status Bar ticker stacking */
+  .status-bar-ticker {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+}
+
+/* 3. Viewports below 480px (Small Mobile Devices) */
+@media (max-width: 480px) {
+  /* Font size scale-down for premium readability */
+  h1, .h1 {
+    font-size: 20px !important;
+  }
+  h2, .h2 {
+    font-size: 18px !important;
+  }
+  h3, .h3 {
+    font-size: 16px !important;
+  }
+  body, p, span, td, th {
+    font-size: 13px !important;
+  }
+
+  /* Filters card stack & wrap neatly */
+  .filters-row-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+  .filters-left-section {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+  .search-bar-container, .search-bar-input {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* Smaller padding on wrapper and card elements */
+  .main-wrapper {
+    padding: 12px !important;
+    gap: 12px !important;
+  }
+  .card {
+    padding: 12px !important;
+  }
+}

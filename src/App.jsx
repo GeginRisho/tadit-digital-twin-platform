@@ -73,7 +73,7 @@ function AnimatedCounter({ value }) {
 
 export default function App() {
   // Theme state
-  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
+  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "light");
   
   // Navigation layout state
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -1119,10 +1119,10 @@ export default function App() {
           {isProfileOpen && (
             <div className="profile-dropdown-menu">
               <span className="profile-dropdown-item" onClick={() => { setActiveTab("dashboard"); setIsProfileOpen(false); setIsMobileSidebarOpen(false); }}>SaaS Settings</span>
-              <span className="profile-dropdown-item" onClick={() => { setIsMuted(!isMuted); setIsProfileOpen(false); }}>
+              <span className="profile-dropdown-item" onClick={() => { setIsMuted(!isMuted); setIsProfileOpen(false); setIsMobileSidebarOpen(false); }}>
                 {isMuted ? "Unmute Alarm Chime" : "Mute Alarm Chime"}
               </span>
-              <span className="profile-dropdown-item" onClick={() => setIsProfileOpen(false)}>System Diagnostics</span>
+              <span className="profile-dropdown-item" onClick={() => { setIsProfileOpen(false); setIsMobileSidebarOpen(false); }}>System Diagnostics</span>
             </div>
           )}
         </div>
@@ -1494,7 +1494,7 @@ export default function App() {
             </div>
 
             {/* Interactive GIS Map & Timeline Panel */}
-            <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: "24px" }}>
+            <div className="map-grid-container">
               <DistrictMap
                 selectedDistrict={selectedDistrict}
                 onSelectDistrict={setSelectedDistrict}
@@ -2059,7 +2059,7 @@ export default function App() {
             </div>
 
             {/* Datatable Grid */}
-            <div className="table-responsive-wrapper" style={{ overflowHidden: "hidden" }}>
+            <div className="table-responsive-wrapper" style={{ overflowX: "auto" }}>
               <div>
                 <table className="districts-table" style={{ fontSize: "13px" }}>
                   <thead>
@@ -2321,7 +2321,7 @@ export default function App() {
             </div>
 
             {/* Datatable */}
-            <div className="table-responsive-wrapper" style={{ overflow: "hidden" }}>
+            <div className="table-responsive-wrapper" style={{ overflowX: "auto" }}>
               <div>
                 <table className="districts-table" style={{ fontSize: "13px" }}>
                   <thead>
@@ -2520,7 +2520,7 @@ export default function App() {
 
             <form onSubmit={handleSaveBusiness} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
               {/* Form Grid sections */}
-              <div className="mgt-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+              <div className="mgt-form-grid">
                 
                 {/* Column 1: General Details */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -2548,7 +2548,7 @@ export default function App() {
                     {formErrors.owner && <span style={{ fontSize: "10.5px", color: "var(--color-red)" }}>{formErrors.owner}</span>}
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div className="form-subgrid">
                     <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                       <label style={{ fontSize: "11.5px", fontWeight: "600", color: "var(--text-secondary)" }}>Category *</label>
                       <select
@@ -2609,7 +2609,7 @@ export default function App() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                   <h4 style={{ margin: "0 0 4px 0", fontSize: "13px", fontWeight: "700", color: "var(--primary)", borderBottom: "1px solid var(--border-color)", paddingBottom: "4px" }}>Contact & Location</h4>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div className="form-subgrid">
                     <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                       <label style={{ fontSize: "11.5px", fontWeight: "600", color: "var(--text-secondary)" }}>Phone *</label>
                       <input
@@ -2634,7 +2634,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div className="form-subgrid">
                     <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                       <label style={{ fontSize: "11.5px", fontWeight: "600", color: "var(--text-secondary)" }}>Website</label>
                       <input
@@ -2659,7 +2659,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div className="form-subgrid">
                     <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                       <label style={{ fontSize: "11.5px", fontWeight: "600", color: "var(--text-secondary)" }}>GST Number *</label>
                       <input
@@ -2695,7 +2695,7 @@ export default function App() {
                     {formErrors.address && <span style={{ fontSize: "10.5px", color: "var(--color-red)" }}>{formErrors.address}</span>}
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div className="form-subgrid">
                     <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                       <label style={{ fontSize: "11.5px", fontWeight: "600", color: "var(--text-secondary)" }}>Latitude *</label>
                       <input
@@ -2729,7 +2729,7 @@ export default function App() {
               <div style={{ display: "flex", flexDirection: "column", gap: "12px", borderTop: "1px solid var(--border-color)", paddingTop: "12px" }}>
                 <h4 style={{ margin: "0 0 4px 0", fontSize: "13px", fontWeight: "700", color: "var(--primary)" }}>Twin Node Initial Metrics</h4>
                 
-                <div className="mgt-metrics-row" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "12px" }}>
+                <div className="mgt-metrics-row">
                   <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                     <label style={{ fontSize: "11.5px", fontWeight: "600", color: "var(--text-secondary)" }}>Health Score (0-100)</label>
                     <input
