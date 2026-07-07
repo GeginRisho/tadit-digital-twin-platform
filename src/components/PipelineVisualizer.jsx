@@ -333,7 +333,7 @@ export default function PipelineVisualizer({
           <span>Kubernetes Pod Auto-Scaler Console (scaling group: `tn-digitaltwin-cluster`)</span>
         </h3>
         
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "10px" }}>
+        <div className="kubernetes-pod-grid">
           {kubernetesPods.map((pod, idx) => {
             const cpuInt = parseInt(pod.cpu);
             const memInt = Math.round((parseInt(pod.memory) / 1024) * 100);

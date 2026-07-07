@@ -53,12 +53,9 @@ function DistrictMap({
     });
   }, []);
 
-  // Predetermined top 8 largest districts in population to preserve on mobile viewports
+  // Major cities to display on mobile viewports
   const topRankedNames = useMemo(() => {
-    return [...officialDistricts]
-      .sort((a, b) => b.pop - a.pop)
-      .slice(0, 8)
-      .map(d => d.name);
+    return ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tiruppur"];
   }, []);
 
   // Dynamic collision detection and positioning of district labels based on priority and zoom
@@ -79,10 +76,16 @@ function DistrictMap({
       const isHovered = hoveredNode === node.name;
       const isLargest = topRankedNames.includes(node.name);
       
+      // Reduce node radius slightly on mobile viewports
+      let r = node.r;
+      if (isMobile) {
+        r = node.name === "Chennai" ? 11 : node.name === "Coimbatore" || node.name === "Madurai" ? 9.5 : 6.5;
+      }
+      
       let baseVisible = true;
       if (!isSelected && !isHovered) {
         if (isMobile) {
-          // On mobile screens, only show hovered, selected, or top N largest districts by default
+          // On mobile screens, only show hovered, selected, or major cities by default
           if (!isLargest) {
             baseVisible = false;
           }
@@ -93,7 +96,10 @@ function DistrictMap({
         }
       }
 
-      const currentFontSize = Math.max(6.5, Math.min(10, 10 / zoom));
+      // Responsive font sizing dynamically computed
+      const baseFontLimit = isMobile ? 8.0 : 10.0;
+      const minFontLimit = isMobile ? 5.5 : 6.5;
+      const currentFontSize = Math.max(minFontLimit, Math.min(baseFontLimit, baseFontLimit / zoom));
       const fontWidth = currentFontSize * 0.55;
       const fontHeight = currentFontSize;
       
@@ -118,7 +124,7 @@ function DistrictMap({
         for (const pos of positions) {
           let left = 0, top = 0;
           const spacing = 4;
-          const offset = node.r + spacing;
+          const offset = r + spacing;
           
           if (pos === "right") {
             left = node.x + offset;
@@ -143,7 +149,7 @@ function DistrictMap({
           };
           
           overlaps = placedBoxes.some(other => {
-            const padding = 2.0; // Slightly larger padding for better separation
+            const padding = isMobile ? 4.0 : 2.0; // Dynamic safety padding margin
             return !(
               box.right + padding < other.left ||
               box.left - padding > other.right ||
@@ -162,7 +168,7 @@ function DistrictMap({
         if (overlaps) {
           if (isSelected || isHovered) {
             finalPos = "right";
-            const offset = node.r + 4;
+            const offset = r + 4;
             finalBox = {
               left: node.x + offset,
               top: node.y - fontHeight / 2,
@@ -182,6 +188,7 @@ function DistrictMap({
       
       return {
         ...node,
+        r,
         visible,
         labelPos: finalPos,
         fontSize: currentFontSize
@@ -483,7 +490,9 @@ function DistrictMap({
               flexDirection: "column",
               alignItems: "center",
               overflow: "hidden",
-              cursor: isDragging ? "grabbing" : "grab"
+              cursor: isDragging ? "grabbing" : "grab",
+              width: "100%",
+              boxSizing: "border-box"
             }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
