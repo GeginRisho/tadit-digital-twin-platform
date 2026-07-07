@@ -2174,11 +2174,19 @@ export default function App() {
               </div>
 
               {/* Mobile Card Layout */}
-              <div className="mobile-only-cards">
+              <div className="mobile-only-cards" style={{ display: "none", flexDirection: "column", gap: "12px" }}>
                 {paginatedBusinesses.map((biz) => {
                   let healthColor = "var(--color-green)";
-                  if (biz.currentHealth < 75) healthColor = "var(--color-red)";
-                  else if (biz.currentHealth < 85) healthColor = "var(--color-amber)";
+                  let statusText = "Optimal";
+                  if (biz.currentHealth < 75) {
+                    healthColor = "var(--color-red)";
+                    statusText = "Critical";
+                  } else if (biz.currentHealth < 85) {
+                    healthColor = "var(--color-amber)";
+                    statusText = "Warning";
+                  }
+
+                  const bizRevenue = Math.round((biz.baseRevenue || 250) * (biz.currentHealth / 100));
 
                   return (
                     <div 
@@ -2188,17 +2196,19 @@ export default function App() {
                       style={{
                         display: "flex",
                         flexDirection: "column",
-                        gap: "12px",
+                        gap: "10px",
                         padding: "16px",
                         cursor: "pointer",
                         border: "1px solid var(--border-color)",
                         borderRadius: "12px",
-                        backgroundColor: "var(--bg-card)"
+                        backgroundColor: "var(--bg-card)",
+                        width: "100%",
+                        boxSizing: "border-box"
                       }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
                         <div style={{ minWidth: 0, flex: 1 }}>
-                          <h4 className="text-truncate" style={{ margin: 0, fontSize: "14px", fontWeight: "700" }}>{biz.name}</h4>
+                          <h4 className="text-truncate" style={{ margin: 0, fontSize: "14px", fontWeight: "700", color: "var(--text-primary)" }}>{biz.name}</h4>
                           <span style={{ fontSize: "11px", color: "var(--text-muted)", display: "block", marginTop: "2px" }}>Category: {biz.category}</span>
                         </div>
                         <span style={{
@@ -2216,16 +2226,22 @@ export default function App() {
 
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "12px", color: "var(--text-secondary)" }}>
                         <div className="text-truncate">
-                          <strong>Owner:</strong> {biz.owner || "N/A"}
-                        </div>
-                        <div className="text-truncate">
                           <strong>District:</strong> {biz.district}
                         </div>
-                        <div style={{ gridColumn: "span 2" }} className="text-break">
-                          <strong>GST:</strong> <span style={{ fontFamily: "var(--font-mono)", fontSize: "11.5px" }}>{biz.gstNumber}</span>
+                        <div className="text-truncate">
+                          <strong>Revenue:</strong> ₹{bizRevenue}L
                         </div>
-                        <div style={{ gridColumn: "span 2" }} className="text-truncate">
-                          <strong>PIN:</strong> <span style={{ fontFamily: "var(--font-mono)" }}>{biz.pincode}</span>
+                        <div className="text-truncate" style={{ gridColumn: "span 2" }}>
+                          <strong>Status:</strong>{" "}
+                          <span style={{ 
+                            color: healthColor, 
+                            fontWeight: "600",
+                            backgroundColor: healthColor === "var(--color-green)" ? "rgba(16, 185, 129, 0.1)" : healthColor === "var(--color-amber)" ? "rgba(245, 158, 11, 0.1)" : "rgba(239, 68, 68, 0.1)",
+                            padding: "1px 6px",
+                            borderRadius: "4px"
+                          }}>
+                            {statusText}
+                          </span>
                         </div>
                       </div>
 
@@ -2562,7 +2578,7 @@ export default function App() {
               </div>
 
               {/* Mobile Card Layout */}
-              <div className="mobile-only-cards">
+              <div className="mobile-only-cards" style={{ display: "none", flexDirection: "column", gap: "12px" }}>
                 {paginatedMgtBusinesses.length === 0 ? (
                   <div style={{ textAlign: "center", padding: "32px", color: "var(--text-muted)", width: "100%" }}>
                     No matching digital twins found. Click "Add Business Twin" to register one.
@@ -2570,8 +2586,16 @@ export default function App() {
                 ) : (
                   paginatedMgtBusinesses.map((biz) => {
                     let healthColor = "var(--color-green)";
-                    if (biz.currentHealth < 75) healthColor = "var(--color-red)";
-                    else if (biz.currentHealth < 85) healthColor = "var(--color-amber)";
+                    let statusText = "Optimal";
+                    if (biz.currentHealth < 75) {
+                      healthColor = "var(--color-red)";
+                      statusText = "Critical";
+                    } else if (biz.currentHealth < 85) {
+                      healthColor = "var(--color-amber)";
+                      statusText = "Warning";
+                    }
+
+                    const bizRevenue = Math.round((biz.baseRevenue || 250) * (biz.currentHealth / 100));
 
                     return (
                       <div 
@@ -2580,17 +2604,19 @@ export default function App() {
                         style={{
                           display: "flex",
                           flexDirection: "column",
-                          gap: "12px",
+                          gap: "10px",
                           padding: "16px",
                           border: "1px solid var(--border-color)",
                           borderRadius: "12px",
-                          backgroundColor: "var(--bg-card)"
+                          backgroundColor: "var(--bg-card)",
+                          width: "100%",
+                          boxSizing: "border-box"
                         }}
                       >
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
                           <div style={{ minWidth: 0, flex: 1 }}>
-                            <h4 className="text-truncate" style={{ margin: 0, fontSize: "14px", fontWeight: "700" }}>{biz.name}</h4>
-                            <span style={{ fontSize: "11px", color: "var(--text-muted)", display: "block", marginTop: "2px" }}>ID: {biz.id} | Category: {biz.category}</span>
+                            <h4 className="text-truncate" style={{ margin: 0, fontSize: "14px", fontWeight: "700", color: "var(--text-primary)" }}>{biz.name}</h4>
+                            <span style={{ fontSize: "11px", color: "var(--text-muted)", display: "block", marginTop: "2px" }}>Category: {biz.category}</span>
                           </div>
                           <span style={{
                             color: healthColor,
@@ -2607,19 +2633,22 @@ export default function App() {
 
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "12px", color: "var(--text-secondary)" }}>
                           <div className="text-truncate">
-                            <strong>Owner:</strong> {biz.owner}
-                          </div>
-                          <div className="text-truncate">
                             <strong>District:</strong> {biz.district}
                           </div>
-                          <div style={{ gridColumn: "span 2" }} className="text-break">
-                            <strong>Email:</strong> {biz.email}
+                          <div className="text-truncate">
+                            <strong>Revenue:</strong> ₹{bizRevenue}L
                           </div>
-                          <div style={{ gridColumn: "span 2" }} className="text-break">
-                            <strong>GST:</strong> <span style={{ fontFamily: "var(--font-mono)", fontSize: "11.5px" }}>{biz.gstNumber}</span>
-                          </div>
-                          <div style={{ gridColumn: "span 2" }} className="text-truncate">
-                            <strong>Reg:</strong> <span style={{ fontFamily: "var(--font-mono)" }}>{biz.registrationNo}</span>
+                          <div className="text-truncate" style={{ gridColumn: "span 2" }}>
+                            <strong>Status:</strong>{" "}
+                            <span style={{ 
+                              color: healthColor, 
+                              fontWeight: "600",
+                              backgroundColor: healthColor === "var(--color-green)" ? "rgba(16, 185, 129, 0.1)" : healthColor === "var(--color-amber)" ? "rgba(245, 158, 11, 0.1)" : "rgba(239, 68, 68, 0.1)",
+                              padding: "1px 6px",
+                              borderRadius: "4px"
+                            }}>
+                              {statusText}
+                            </span>
                           </div>
                         </div>
 

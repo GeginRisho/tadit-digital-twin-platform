@@ -145,7 +145,7 @@ export default function PipelineVisualizer({
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           
           {/* SVG Flowchart (scrollable container) */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px", backgroundColor: "var(--bg-main)", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-color)", overflowX: "auto" }}>
+          <div className="desktop-only-table" style={{ display: "flex", flexDirection: "column", gap: "10px", backgroundColor: "var(--bg-main)", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-color)", overflowX: "auto" }}>
             <span style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-secondary)", display: "block" }}>
               Ref: Click pipeline nodes to inspect data schemas & live values
             </span>
@@ -236,34 +236,40 @@ export default function PipelineVisualizer({
           </div>
 
           {/* Mobile Stacked Node Cards (Visible only on mobile) */}
-          <div className="mobile-only-cards" style={{ display: "none", flexDirection: "column", gap: "10px" }}>
-            {nodes.map((node) => {
+          <div className="mobile-only-cards pipeline-vertical-flow" style={{ display: "none", flexDirection: "column", gap: "10px", alignItems: "center" }}>
+            {nodes.map((node, idx) => {
               const isSelected = selectedNode === node.id;
               let nodeColor = "var(--primary)";
               if (node.id === "spark" && sparkWindow.length > 8) nodeColor = "var(--color-red)";
               else if (node.id === "redis") nodeColor = "var(--color-amber)";
 
               return (
-                <div
-                  key={node.id}
-                  onClick={() => setSelectedNode(node.id)}
-                  style={{
-                    padding: "12px 16px",
-                    borderRadius: "8px",
-                    border: `1.5px solid ${isSelected ? nodeColor : "var(--border-color)"}`,
-                    backgroundColor: isSelected ? "var(--primary-light)" : "var(--bg-surface)",
-                    cursor: "pointer",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center"
-                  }}
-                >
-                  <div>
-                    <strong style={{ fontSize: "13.5px", color: isSelected ? nodeColor : "var(--text-primary)" }}>{node.name}</strong>
-                    <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{node.tech}</div>
+                <React.Fragment key={node.id}>
+                  {idx > 0 && (
+                    <div style={{ color: "var(--text-muted)", fontSize: "16px", fontWeight: "700", margin: "4px 0" }}>↓</div>
+                  )}
+                  <div
+                    onClick={() => setSelectedNode(node.id)}
+                    style={{
+                      padding: "12px 16px",
+                      borderRadius: "12px",
+                      border: `1.5px solid ${isSelected ? nodeColor : "var(--border-color)"}`,
+                      backgroundColor: isSelected ? "var(--primary-light)" : "var(--bg-surface)",
+                      cursor: "pointer",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      width: "100%",
+                      boxSizing: "border-box"
+                    }}
+                  >
+                    <div>
+                      <strong style={{ fontSize: "13.5px", color: isSelected ? nodeColor : "var(--text-primary)" }}>{node.name}</strong>
+                      <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{node.tech}</div>
+                    </div>
+                    <span style={{ fontSize: "11.5px", color: "var(--text-secondary)", fontWeight: "600" }}>{node.throughput}</span>
                   </div>
-                  <span style={{ fontSize: "11.5px", color: "var(--text-secondary)", fontWeight: "600" }}>{node.throughput}</span>
-                </div>
+                </React.Fragment>
               );
             })}
           </div>

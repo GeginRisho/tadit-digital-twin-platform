@@ -278,45 +278,87 @@ export default function AIRecommendations({
               <p style={{ margin: 0, fontSize: "12px" }}>Trigger anomalies and click "Execute Playbook" to view telemetry logs and resolution timings.</p>
             </div>
           ) : (
-            <div style={{ overflowX: "auto", border: "1px solid var(--border-color)", borderRadius: "8px" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left" }}>
-                <thead style={{ backgroundColor: "var(--bg-main)", borderBottom: "1px solid var(--border-color)" }}>
-                  <tr>
-                    <th style={{ padding: "10px 14px", color: "var(--text-secondary)", fontWeight: "600" }}>Executed Plan</th>
-                    <th style={{ padding: "10px 14px", color: "var(--text-secondary)", fontWeight: "600" }}>Target Twin</th>
-                    <th style={{ padding: "10px 14px", color: "var(--text-secondary)", fontWeight: "600" }}>Outcome</th>
-                    <th style={{ padding: "10px 14px", color: "var(--text-secondary)", fontWeight: "600" }}>Timeline</th>
-                    <th style={{ padding: "10px 14px", color: "var(--text-secondary)", fontWeight: "600", textAlign: "right" }}>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {executionHistory.map((item, idx) => (
-                    <tr key={idx} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                      <td style={{ padding: "10px 14px", fontWeight: "600", color: "var(--text-primary)" }}>
-                        {item.planName}
-                      </td>
-                      <td style={{ padding: "10px 14px", color: "var(--primary)" }}>{item.businessName}</td>
-                      <td style={{ padding: "10px 14px", color: "var(--color-green)", fontSize: "12px" }}>{item.outcome}</td>
-                      <td style={{ padding: "10px 14px", color: "var(--text-muted)", fontSize: "11px", fontFamily: "var(--font-mono)" }}>
-                        {item.timestamp} (resolves in {item.resolutionTime})
-                      </td>
-                      <td style={{ padding: "10px 14px", textAlign: "right" }}>
-                        <span style={{
-                          backgroundColor: "rgba(16, 185, 129, 0.15)",
-                          color: "var(--color-green)",
-                          fontSize: "10.5px",
-                          fontWeight: "700",
-                          padding: "2px 6px",
-                          borderRadius: "4px"
-                        }}>
-                          SUCCESS
-                        </span>
-                      </td>
+            <React.Fragment>
+              <div className="desktop-only-table" style={{ overflowX: "auto", border: "1px solid var(--border-color)", borderRadius: "8px" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left" }}>
+                  <thead style={{ backgroundColor: "var(--bg-main)", borderBottom: "1px solid var(--border-color)" }}>
+                    <tr>
+                      <th style={{ padding: "10px 14px", color: "var(--text-secondary)", fontWeight: "600" }}>Executed Plan</th>
+                      <th style={{ padding: "10px 14px", color: "var(--text-secondary)", fontWeight: "600" }}>Target Twin</th>
+                      <th style={{ padding: "10px 14px", color: "var(--text-secondary)", fontWeight: "600" }}>Outcome</th>
+                      <th style={{ padding: "10px 14px", color: "var(--text-secondary)", fontWeight: "600" }}>Timeline</th>
+                      <th style={{ padding: "10px 14px", color: "var(--text-secondary)", fontWeight: "600", textAlign: "right" }}>Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {executionHistory.map((item, idx) => (
+                      <tr key={idx} style={{ borderBottom: "1px solid var(--border-color)" }}>
+                        <td style={{ padding: "10px 14px", fontWeight: "600", color: "var(--text-primary)" }}>
+                          {item.planName}
+                        </td>
+                        <td style={{ padding: "10px 14px", color: "var(--primary)" }}>{item.businessName}</td>
+                        <td style={{ padding: "10px 14px", color: "var(--color-green)", fontSize: "12px" }}>{item.outcome}</td>
+                        <td style={{ padding: "10px 14px", color: "var(--text-muted)", fontSize: "11px", fontFamily: "var(--font-mono)" }}>
+                          {item.timestamp} (resolves in {item.resolutionTime})
+                        </td>
+                        <td style={{ padding: "10px 14px", textAlign: "right" }}>
+                          <span style={{
+                            backgroundColor: "rgba(16, 185, 129, 0.15)",
+                            color: "var(--color-green)",
+                            fontSize: "10.5px",
+                            fontWeight: "700",
+                            padding: "2px 6px",
+                            borderRadius: "4px"
+                          }}>
+                            SUCCESS
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mobile-only-cards" style={{ display: "none", flexDirection: "column", gap: "10px" }}>
+                {executionHistory.map((item, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      padding: "12px",
+                      borderRadius: "8px",
+                      border: "1px solid var(--border-color)",
+                      backgroundColor: "var(--bg-surface)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "6px"
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <strong style={{ fontSize: "13px", color: "var(--text-primary)" }}>{item.planName}</strong>
+                      <span style={{
+                        backgroundColor: "rgba(16, 185, 129, 0.15)",
+                        color: "var(--color-green)",
+                        fontSize: "10.5px",
+                        fontWeight: "700",
+                        padding: "2px 6px",
+                        borderRadius: "4px"
+                      }}>
+                        SUCCESS
+                      </span>
+                    </div>
+                    <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                      Target: <span style={{ color: "var(--primary)" }}>{item.businessName}</span>
+                    </div>
+                    <div style={{ fontSize: "12px", color: "var(--color-green)" }}>
+                      Outcome: {item.outcome}
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
+                      Timeline: {item.timestamp} (resolves in {item.resolutionTime})
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </React.Fragment>
           )
         )}
       </div>

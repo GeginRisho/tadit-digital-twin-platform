@@ -469,277 +469,279 @@ function DistrictMap({
       </div>
 
       <div className="map-grid">
-        {/* SVG Network Map container */}
-        <div 
-          className="map-svg-container" 
-          style={{
-            backgroundColor: "var(--bg-main)",
-            borderRadius: "12px",
-            border: "1px solid var(--border-color)",
-            padding: "12px",
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            overflow: "hidden",
-            cursor: isDragging ? "grabbing" : "grab"
-          }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onWheel={handleWheel}
-        >
-          {/* Zoom & Screen HUD Controls */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%" }} className="map-left-column">
+          {/* SVG Network Map container */}
           <div 
-            className="map-hud-controls" 
-            onClick={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={handleZoomIn}
-              aria-label="Zoom In"
-            >
-              <Plus size={16} />
-            </button>
-            <button
-              onClick={handleZoomOut}
-              aria-label="Zoom Out"
-            >
-              <Minus size={16} />
-            </button>
-            <button
-              onClick={handleResetView}
-              aria-label="Reset View"
-            >
-              <RotateCcw size={14} />
-            </button>
-            <button
-              onClick={toggleFullscreen}
-              aria-label="Toggle Fullscreen"
-            >
-              {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-            </button>
-          </div>
-
-          <svg 
-            ref={svgRef}
-            viewBox="0 0 400 500" 
-            preserveAspectRatio="xMidYMid meet"
-            className="tn-network-map" 
-            style={{ 
-              width: "100%", 
-              maxHeight: "400px", 
-              pointerEvents: "auto",
-              userSelect: "none"
+            className="map-svg-container" 
+            style={{
+              backgroundColor: "var(--bg-main)",
+              borderRadius: "12px",
+              border: "1px solid var(--border-color)",
+              padding: "12px",
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              overflow: "hidden",
+              cursor: isDragging ? "grabbing" : "grab"
             }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onWheel={handleWheel}
           >
-            <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
-              {/* Tamil Nadu Stylized Boundaries */}
-              <path
-                d="M 280,30 L 360,50 L 390,90 L 330,160 L 320,220 L 300,280 L 260,330 L 220,440 L 140,490 L 100,470 L 110,420 L 70,300 L 70,220 L 120,180 L 180,100 Z"
-                fill="var(--bg-card)"
-                stroke="var(--border-color)"
-                strokeWidth="2.5"
-                className="tn-bg-boundary"
-              />
+            {/* Zoom & Screen HUD Controls */}
+            <div 
+              className="map-hud-controls" 
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={handleZoomIn}
+                aria-label="Zoom In"
+              >
+                <Plus size={16} />
+              </button>
+              <button
+                onClick={handleZoomOut}
+                aria-label="Zoom Out"
+              >
+                <Minus size={16} />
+              </button>
+              <button
+                onClick={handleResetView}
+                aria-label="Reset View"
+              >
+                <RotateCcw size={14} />
+              </button>
+              <button
+                onClick={toggleFullscreen}
+                aria-label="Toggle Fullscreen"
+              >
+                {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+              </button>
+            </div>
 
-              {/* Grid Pattern overlay */}
-              <g>
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <line key={`h-${i}`} x1="0" y1={i * 50} x2="400" y2={i * 50} stroke="var(--border-color)" strokeWidth="0.5" opacity="0.3" />
-                ))}
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <line key={`v-${i}`} x1={i * 50} y1="0" x2={i * 50} y2="500" stroke="var(--border-color)" strokeWidth="0.5" opacity="0.3" />
-                ))}
-              </g>
+            <svg 
+              ref={svgRef}
+              viewBox="0 0 400 500" 
+              preserveAspectRatio="xMidYMid meet"
+              className="tn-network-map" 
+              style={{ 
+                width: "100%", 
+                maxHeight: "400px", 
+                pointerEvents: "auto",
+                userSelect: "none"
+              }}
+            >
+              <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
+                {/* Tamil Nadu Stylized Boundaries */}
+                <path
+                  d="M 280,30 L 360,50 L 390,90 L 330,160 L 320,220 L 300,280 L 260,330 L 220,440 L 140,490 L 100,470 L 110,420 L 70,300 L 70,220 L 120,180 L 180,100 Z"
+                  fill="var(--bg-card)"
+                  stroke="var(--border-color)"
+                  strokeWidth="2.5"
+                  className="tn-bg-boundary"
+                />
 
-              {/* Network Connections */}
-              {networkConnections.map((conn, idx) => {
-                const fromNode = districtNodes.find((n) => n.name === conn.from);
-                const toNode = districtNodes.find((n) => n.name === conn.to);
-                if (!fromNode || !toNode) return null;
+                {/* Grid Pattern overlay */}
+                <g>
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <line key={`h-${i}`} x1="0" y1={i * 50} x2="400" y2={i * 50} stroke="var(--border-color)" strokeWidth="0.5" opacity="0.3" />
+                  ))}
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <line key={`v-${i}`} x1={i * 50} y1="0" x2={i * 50} y2="500" stroke="var(--border-color)" strokeWidth="0.5" opacity="0.3" />
+                  ))}
+                </g>
 
-                const fromStats = districtStats[fromNode.name] || { averageHealth: 90 };
-                const toStats = districtStats[toNode.name] || { averageHealth: 90 };
-                const isCrisis = fromStats.averageHealth < 75 || toStats.averageHealth < 75;
+                {/* Network Connections */}
+                {networkConnections.map((conn, idx) => {
+                  const fromNode = districtNodes.find((n) => n.name === conn.from);
+                  const toNode = districtNodes.find((n) => n.name === conn.to);
+                  if (!fromNode || !toNode) return null;
 
-                return (
-                  <line
-                    key={`line-${idx}`}
-                    x1={fromNode.x}
-                    y1={fromNode.y}
-                    x2={toNode.x}
-                    y2={toNode.y}
-                    stroke={isCrisis ? "var(--color-red)" : "var(--primary)"}
-                    strokeWidth={isCrisis ? "2.5" : "1.5"}
-                    strokeDasharray={isCrisis ? "4,4" : "0"}
-                    opacity="0.6"
-                  />
-                );
-              })}
+                  const fromStats = districtStats[fromNode.name] || { averageHealth: 90 };
+                  const toStats = districtStats[toNode.name] || { averageHealth: 90 };
+                  const isCrisis = fromStats.averageHealth < 75 || toStats.averageHealth < 75;
 
-              {/* Live Business Event Pulse Dots clustered geographically around district center */}
-              {businesses.map((biz) => {
-                const isCrisis = biz.riskLevel === "high";
-                const isGrowth = biz.trend === "up" && biz.currentHealth > 90;
-                
-                const isBelongingToSelected = selectedDistrict ? biz.district === selectedDistrict : true;
-                const opacity = selectedDistrict 
-                  ? (isBelongingToSelected ? 0.95 : 0.15) 
-                  : 0.95;
+                  return (
+                    <line
+                      key={`line-${idx}`}
+                      x1={fromNode.x}
+                      y1={fromNode.y}
+                      x2={toNode.x}
+                      y2={toNode.y}
+                      stroke={isCrisis ? "var(--color-red)" : "var(--primary)"}
+                      strokeWidth={isCrisis ? "2.5" : "1.5"}
+                      strokeDasharray={isCrisis ? "4,4" : "0"}
+                      opacity="0.6"
+                    />
+                  );
+                })}
+
+                {/* Live Business Event Pulse Dots clustered geographically around district center */}
+                {businesses.map((biz) => {
+                  const isCrisis = biz.riskLevel === "high";
+                  const isGrowth = biz.trend === "up" && biz.currentHealth > 90;
                   
-                const radius = selectedDistrict && isBelongingToSelected
-                  ? (isCrisis ? 6 : isGrowth ? 5 : 4.5)
-                  : (isCrisis ? 4.5 : isGrowth ? 3.5 : 2.5);
+                  const isBelongingToSelected = selectedDistrict ? biz.district === selectedDistrict : true;
+                  const opacity = selectedDistrict 
+                    ? (isBelongingToSelected ? 0.95 : 0.15) 
+                    : 0.95;
+                    
+                  const radius = selectedDistrict && isBelongingToSelected
+                    ? (isCrisis ? 6 : isGrowth ? 5 : 4.5)
+                    : (isCrisis ? 4.5 : isGrowth ? 3.5 : 2.5);
 
-                return (
-                  <circle
-                    key={`dot-${biz.id}`}
-                    cx={biz.coordinates.x}
-                    cy={biz.coordinates.y}
-                    r={radius}
-                    fill={isCrisis ? "var(--color-red)" : isGrowth ? "var(--color-green)" : "var(--primary)"}
-                    opacity={opacity}
-                    className={isCrisis ? "pulse-dot-red" : isGrowth ? "pulse-dot-green" : ""}
-                    style={{ 
-                      transition: "opacity 0.3s ease, r 0.3s ease",
-                      cursor: "pointer"
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onSelectBusiness) {
-                        onSelectBusiness(biz.id);
-                      } else {
-                        onSelectBusinessId(biz.id);
-                      }
-                    }}
-                  />
-                );
-              })}
+                  return (
+                    <circle
+                      key={`dot-${biz.id}`}
+                      cx={biz.coordinates.x}
+                      cy={biz.coordinates.y}
+                      r={radius}
+                      fill={isCrisis ? "var(--color-red)" : isGrowth ? "var(--color-green)" : "var(--primary)"}
+                      opacity={opacity}
+                      className={isCrisis ? "pulse-dot-red" : isGrowth ? "pulse-dot-green" : ""}
+                      style={{ 
+                        transition: "opacity 0.3s ease, r 0.3s ease",
+                        cursor: "pointer"
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onSelectBusiness) {
+                          onSelectBusiness(biz.id);
+                        } else {
+                          onSelectBusinessId(biz.id);
+                        }
+                      }}
+                    />
+                  );
+                })}
 
-              {/* District Nodes */}
-              {processedNodes.map((node) => {
-                const stats = districtStats[node.name] || { count: 0, averageHealth: 100, crises: 0 };
-                const isSelected = selectedDistrict === node.name;
-                const isHovered = hoveredNode === node.name;
+                {/* District Nodes */}
+                {processedNodes.map((node) => {
+                  const stats = districtStats[node.name] || { count: 0, averageHealth: 100, crises: 0 };
+                  const isSelected = selectedDistrict === node.name;
+                  const isHovered = hoveredNode === node.name;
 
-                let nodeColor = "var(--color-green)"; // Healthy
-                let strokeColor = "var(--color-green)";
-                if (stats.averageHealth < 75) {
-                  nodeColor = "var(--color-red)"; // Crisis
-                  strokeColor = "var(--color-red)";
-                } else if (stats.averageHealth < 85) {
-                  nodeColor = "var(--color-amber)"; // Warning
-                  strokeColor = "var(--color-amber)";
-                }
+                  let nodeColor = "var(--color-green)"; // Healthy
+                  let strokeColor = "var(--color-green)";
+                  if (stats.averageHealth < 75) {
+                    nodeColor = "var(--color-red)"; // Crisis
+                    strokeColor = "var(--color-red)";
+                  } else if (stats.averageHealth < 85) {
+                    nodeColor = "var(--color-amber)"; // Warning
+                    strokeColor = "var(--color-amber)";
+                  }
 
-                return (
-                  <g
-                    key={node.name}
-                    transform={`translate(${node.x}, ${node.y})`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const isSel = selectedDistrict === node.name;
-                      const nextDistrict = isSel ? null : node.name;
-                      onSelectDistrict(nextDistrict);
-                      
-                      if (nextDistrict) {
-                        const districtBiz = businesses.filter((b) => b.district === nextDistrict);
-                        if (districtBiz.length > 0) {
-                          onSelectBusinessId(districtBiz[0].id);
+                  return (
+                    <g
+                      key={node.name}
+                      transform={`translate(${node.x}, ${node.y})`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const isSel = selectedDistrict === node.name;
+                        const nextDistrict = isSel ? null : node.name;
+                        onSelectDistrict(nextDistrict);
+                        
+                        if (nextDistrict) {
+                          const districtBiz = businesses.filter((b) => b.district === nextDistrict);
+                          if (districtBiz.length > 0) {
+                            onSelectBusinessId(districtBiz[0].id);
+                          } else {
+                            onSelectBusinessId(null);
+                          }
                         } else {
                           onSelectBusinessId(null);
                         }
-                      } else {
-                        onSelectBusinessId(null);
-                      }
-                    }}
-                    onMouseEnter={(e) => {
-                      setHoveredNode(node.name);
-                      setHoveredNodeData({ ...node, stats });
-                      setTooltipPos({ x: e.clientX, y: e.clientY });
-                    }}
-                    onMouseMove={(e) => {
-                      setTooltipPos({ x: e.clientX, y: e.clientY });
-                    }}
-                    onMouseLeave={() => {
-                      setHoveredNode(null);
-                      setHoveredNodeData(null);
-                    }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    {/* Hover/Selection shadow rings */}
-                    <circle
-                      r={node.r + (isHovered || isSelected ? 6 : 2)}
-                      fill={nodeColor}
-                      opacity={isHovered || isSelected ? 0.3 : 0.08}
-                      style={{ transition: "all 0.25s ease" }}
-                    />
+                      }}
+                      onMouseEnter={(e) => {
+                        setHoveredNode(node.name);
+                        setHoveredNodeData({ ...node, stats });
+                        setTooltipPos({ x: e.clientX, y: e.clientY });
+                      }}
+                      onMouseMove={(e) => {
+                        setTooltipPos({ x: e.clientX, y: e.clientY });
+                      }}
+                      onMouseLeave={() => {
+                        setHoveredNode(null);
+                        setHoveredNodeData(null);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
+                      {/* Hover/Selection shadow rings */}
+                      <circle
+                        r={node.r + (isHovered || isSelected ? 6 : 2)}
+                        fill={nodeColor}
+                        opacity={isHovered || isSelected ? 0.3 : 0.08}
+                        style={{ transition: "all 0.25s ease" }}
+                      />
 
-                    {/* Core Node */}
-                    <circle
-                      r={node.r}
-                      fill="var(--bg-surface)"
-                      stroke={isSelected ? "var(--primary)" : strokeColor}
-                      strokeWidth={isSelected ? "3" : "2"}
-                    />
-                    
-                    {/* Status Indicator Center */}
-                    <circle r={node.r - 8 > 4 ? node.r - 8 : 4} fill={nodeColor} />
+                      {/* Core Node */}
+                      <circle
+                        r={node.r}
+                        fill="var(--bg-surface)"
+                        stroke={isSelected ? "var(--primary)" : strokeColor}
+                        strokeWidth={isSelected ? "3" : "2"}
+                      />
+                      
+                      {/* Status Indicator Center */}
+                      <circle r={node.r - 8 > 4 ? node.r - 8 : 4} fill={nodeColor} />
 
-                    {/* Text Label */}
-                    {node.visible && (
-                      <text
-                        x={node.labelPos === "left" ? -(node.r + 6) : node.labelPos === "right" ? node.r + 6 : 0}
-                        y={node.labelPos === "top" ? -(node.r + 6) : node.labelPos === "bottom" ? node.r + 14 : 4}
-                        textAnchor={node.labelPos === "left" ? "end" : node.labelPos === "right" ? "start" : "middle"}
-                        fill={isSelected ? "var(--text-primary)" : "var(--text-secondary)"}
-                        fontWeight={isSelected ? "700" : "500"}
-                        fontSize={`${node.fontSize}px`}
-                        style={{
-                          fontFamily: "var(--font-sans)",
-                          userSelect: "none"
-                        }}
-                      >
-                        {node.name}
-                      </text>
-                    )}
-                  </g>
-                );
-              })}
-            </g>
-          </svg>
+                      {/* Text Label */}
+                      {node.visible && (
+                        <text
+                          x={node.labelPos === "left" ? -(node.r + 6) : node.labelPos === "right" ? node.r + 6 : 0}
+                          y={node.labelPos === "top" ? -(node.r + 6) : node.labelPos === "bottom" ? node.r + 14 : 4}
+                          textAnchor={node.labelPos === "left" ? "end" : node.labelPos === "right" ? "start" : "middle"}
+                          fill={isSelected ? "var(--text-primary)" : "var(--text-secondary)"}
+                          fontWeight={isSelected ? "700" : "500"}
+                          fontSize={`${node.fontSize}px`}
+                          style={{
+                            fontFamily: "var(--font-sans)",
+                            userSelect: "none"
+                          }}
+                        >
+                          {node.name}
+                        </text>
+                      )}
+                    </g>
+                  );
+                })}
+              </g>
+            </svg>
 
-          {/* District Tooltip (Portal-like floating overlay on hover) */}
-          {hoveredNodeData && (
-            <div style={{
-              position: "fixed",
-              top: `${tooltipPos.y + 15}px`,
-              left: `${tooltipPos.x + 15}px`,
-              backgroundColor: "var(--bg-surface)",
-              border: "1px solid var(--border-color)",
-              color: "var(--text-primary)",
-              padding: "10px 14px",
-              borderRadius: "8px",
-              fontSize: "12px",
-              boxShadow: "var(--shadow-md)",
-              zIndex: 9999,
-              pointerEvents: "none",
-              display: "flex",
-              flexDirection: "column",
-              gap: "4px",
-              backdropFilter: "blur(4px)"
-            }}>
-              <strong style={{ fontSize: "13px", color: "var(--primary)" }}>{hoveredNodeData.name}</strong>
-              <span>Headquarters: {hoveredNodeData.hq}</span>
-              <span>Monitored Twins: {hoveredNodeData.stats.count}</span>
-              <span>Avg Health: <span style={{ fontWeight: "700", color: (hoveredNodeData.stats.averageHealth || 0) >= 85 ? "var(--color-green)" : (hoveredNodeData.stats.averageHealth || 0) >= 75 ? "var(--color-amber)" : "var(--color-red)" }}>{hoveredNodeData.stats.averageHealth || 0}%</span></span>
-              <span>Avg Sentiment: {Number(hoveredNodeData.stats.sentiment || 0).toFixed(2)}</span>
-              <span>Total Revenue: ₹{Number(hoveredNodeData.stats.revenue || 0).toLocaleString()} Lakhs</span>
-              <span>Active Alerts: {hoveredNodeData.stats.crises || 0}</span>
-            </div>
-          )}
+            {/* District Tooltip (Portal-like floating overlay on hover, disabled on mobile) */}
+            {hoveredNodeData && typeof window !== "undefined" && window.innerWidth > 768 && (
+              <div style={{
+                position: "fixed",
+                top: `${tooltipPos.y + 15}px`,
+                left: `${tooltipPos.x + 15}px`,
+                backgroundColor: "var(--bg-surface)",
+                border: "1px solid var(--border-color)",
+                color: "var(--text-primary)",
+                padding: "10px 14px",
+                borderRadius: "8px",
+                fontSize: "12px",
+                boxShadow: "var(--shadow-md)",
+                zIndex: 9999,
+                pointerEvents: "none",
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+                backdropFilter: "blur(4px)"
+              }}>
+                <strong style={{ fontSize: "13px", color: "var(--primary)" }}>{hoveredNodeData.name}</strong>
+                <span>Headquarters: {hoveredNodeData.hq}</span>
+                <span>Monitored Twins: {hoveredNodeData.stats.count}</span>
+                <span>Avg Health: <span style={{ fontWeight: "700", color: (hoveredNodeData.stats.averageHealth || 0) >= 85 ? "var(--color-green)" : (hoveredNodeData.stats.averageHealth || 0) >= 75 ? "var(--color-amber)" : "var(--color-red)" }}>{hoveredNodeData.stats.averageHealth || 0}%</span></span>
+                <span>Avg Sentiment: {Number(hoveredNodeData.stats.sentiment || 0).toFixed(2)}</span>
+                <span>Total Revenue: ₹{Number(hoveredNodeData.stats.revenue || 0).toLocaleString()} Lakhs</span>
+                <span>Active Alerts: {hoveredNodeData.stats.crises || 0}</span>
+              </div>
+            )}
+          </div>
 
           <div className="map-legend">
             <span>🔴 High Risk</span>
@@ -819,82 +821,148 @@ function DistrictMap({
                 </span>
                 
                 <div className="districts-scrollbar-container" style={{ overflowY: "auto", maxHeight: "230px", border: "1px solid var(--border-color)", borderRadius: "8px" }}>
-                  <table className="districts-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left" }}>
-                    <thead style={{ backgroundColor: "var(--bg-main)", position: "sticky", top: 0, borderBottom: "1px solid var(--border-color)", zIndex: 1 }}>
-                      <tr>
-                        <th style={{ padding: "8px 8px", color: "var(--text-secondary)", fontWeight: "600" }}>Business</th>
-                        <th style={{ padding: "8px 8px", color: "var(--text-secondary)", fontWeight: "600" }}>Category</th>
-                        <th style={{ padding: "8px 8px", color: "var(--text-secondary)", fontWeight: "600", textAlign: "center" }}>Health</th>
-                        <th style={{ padding: "8px 8px", color: "var(--text-secondary)", fontWeight: "600", textAlign: "right" }}>Revenue</th>
-                        <th style={{ padding: "8px 8px", color: "var(--text-secondary)", fontWeight: "600", textAlign: "right" }}>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {districtBusinesses.map((biz) => {
-                        const isCrisis = biz.riskLevel === "high";
-                        const isWarning = biz.riskLevel === "medium";
-                        
-                        let statusColor = "var(--color-green)";
-                        let statusText = "Optimal";
-                        if (isCrisis) {
-                          statusColor = "var(--color-red)";
-                          statusText = "Critical";
-                        } else if (isWarning) {
-                          statusColor = "var(--color-amber)";
-                          statusText = "Warning";
-                        }
+                  
+                  <div className="desktop-only-table">
+                    <table className="districts-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left" }}>
+                      <thead style={{ backgroundColor: "var(--bg-main)", position: "sticky", top: 0, borderBottom: "1px solid var(--border-color)", zIndex: 1 }}>
+                        <tr>
+                          <th style={{ padding: "8px 8px", color: "var(--text-secondary)", fontWeight: "600" }}>Business</th>
+                          <th style={{ padding: "8px 8px", color: "var(--text-secondary)", fontWeight: "600" }}>Category</th>
+                          <th style={{ padding: "8px 8px", color: "var(--text-secondary)", fontWeight: "600", textAlign: "center" }}>Health</th>
+                          <th style={{ padding: "8px 8px", color: "var(--text-secondary)", fontWeight: "600", textAlign: "right" }}>Revenue</th>
+                          <th style={{ padding: "8px 8px", color: "var(--text-secondary)", fontWeight: "600", textAlign: "right" }}>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {districtBusinesses.map((biz) => {
+                          const isCrisis = biz.riskLevel === "high";
+                          const isWarning = biz.riskLevel === "medium";
+                          
+                          let statusColor = "var(--color-green)";
+                          let statusText = "Optimal";
+                          if (isCrisis) {
+                            statusColor = "var(--color-red)";
+                            statusText = "Critical";
+                          } else if (isWarning) {
+                            statusColor = "var(--color-amber)";
+                            statusText = "Warning";
+                          }
 
-                        const bizRevenue = Math.round((biz.baseRevenue || 250) * (biz.currentHealth / 100));
+                          const bizRevenue = Math.round((biz.baseRevenue || 250) * (biz.currentHealth / 100));
 
-                        return (
-                          <tr
-                            key={biz.id}
-                            onClick={() => {
-                              if (onSelectBusiness) {
-                                onSelectBusiness(biz.id);
-                              } else {
-                                onSelectBusinessId(biz.id);
-                              }
-                            }}
-                            style={{
-                              cursor: "pointer",
-                              borderBottom: "1px solid var(--border-color)",
-                              transition: "background 0.2s"
-                            }}
-                            className="district-row-hover"
-                          >
-                            <td style={{ padding: "8px 8px" }}>
-                              <div style={{ fontWeight: "600", color: "var(--text-primary)" }}>{biz.name.split(" (")[0]}</div>
-                              <div style={{ fontSize: "10px", color: "var(--text-muted)" }}>
-                                Sent: {(biz.sentimentScore * 100).toFixed(0)}% • Risk: {biz.riskLevel.toUpperCase()}
-                              </div>
-                            </td>
-                            <td style={{ padding: "8px 8px", color: "var(--text-secondary)" }}>
-                              {biz.category}
-                            </td>
-                            <td style={{ padding: "8px 8px", textAlign: "center", fontWeight: "700", color: statusColor }}>
-                              {biz.currentHealth}%
-                            </td>
-                            <td style={{ padding: "8px 8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>
-                              ₹{bizRevenue}L
-                            </td>
-                            <td style={{ padding: "8px 8px", textAlign: "right" }}>
-                              <span style={{ 
-                                color: statusColor, 
-                                backgroundColor: isCrisis ? "rgba(239, 68, 68, 0.1)" : isWarning ? "rgba(245, 158, 11, 0.1)" : "rgba(16, 185, 129, 0.1)",
-                                padding: "2px 6px",
-                                borderRadius: "4px",
-                                fontSize: "10.5px",
-                                fontWeight: "600"
-                              }}>
-                                {statusText}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                          return (
+                            <tr
+                              key={biz.id}
+                              onClick={() => {
+                                if (onSelectBusiness) {
+                                  onSelectBusiness(biz.id);
+                                } else {
+                                  onSelectBusinessId(biz.id);
+                                }
+                              }}
+                              style={{
+                                cursor: "pointer",
+                                borderBottom: "1px solid var(--border-color)",
+                                transition: "background 0.2s"
+                              }}
+                              className="district-row-hover"
+                            >
+                              <td style={{ padding: "8px 8px" }}>
+                                <div style={{ fontWeight: "600", color: "var(--text-primary)" }}>{biz.name.split(" (")[0]}</div>
+                                <div style={{ fontSize: "10px", color: "var(--text-muted)" }}>
+                                  Sent: {(biz.sentimentScore * 100).toFixed(0)}% • Risk: {biz.riskLevel.toUpperCase()}
+                                </div>
+                              </td>
+                              <td style={{ padding: "8px 8px", color: "var(--text-secondary)" }}>
+                                {biz.category}
+                              </td>
+                              <td style={{ padding: "8px 8px", textAlign: "center", fontWeight: "700", color: statusColor }}>
+                                {biz.currentHealth}%
+                              </td>
+                              <td style={{ padding: "8px 8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>
+                                ₹{bizRevenue}L
+                              </td>
+                              <td style={{ padding: "8px 8px", textAlign: "right" }}>
+                                <span style={{ 
+                                  color: statusColor, 
+                                  backgroundColor: isCrisis ? "rgba(239, 68, 68, 0.1)" : isWarning ? "rgba(245, 158, 11, 0.1)" : "rgba(16, 185, 129, 0.1)",
+                                  padding: "2px 6px",
+                                  borderRadius: "4px",
+                                  fontSize: "10.5px",
+                                  fontWeight: "600"
+                                }}>
+                                  {statusText}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="mobile-only-cards" style={{ display: "none", flexDirection: "column", gap: "10px" }}>
+                    {districtBusinesses.map((biz) => {
+                      const isCrisis = biz.riskLevel === "high";
+                      const isWarning = biz.riskLevel === "medium";
+                      
+                      let statusColor = "var(--color-green)";
+                      let statusText = "Optimal";
+                      if (isCrisis) {
+                        statusColor = "var(--color-red)";
+                        statusText = "Critical";
+                      } else if (isWarning) {
+                        statusColor = "var(--color-amber)";
+                        statusText = "Warning";
+                      }
+
+                      const bizRevenue = Math.round((biz.baseRevenue || 250) * (biz.currentHealth / 100));
+
+                      return (
+                        <div
+                          key={biz.id}
+                          onClick={() => {
+                            if (onSelectBusiness) {
+                              onSelectBusiness(biz.id);
+                            } else {
+                              onSelectBusinessId(biz.id);
+                            }
+                          }}
+                          style={{
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: "1px solid var(--border-color)",
+                            backgroundColor: "var(--bg-surface)",
+                            cursor: "pointer",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "6px"
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+                            <strong style={{ fontSize: "13px", color: "var(--text-primary)" }} className="text-truncate">{biz.name.split(" (")[0]}</strong>
+                            <span style={{ 
+                              color: statusColor, 
+                              backgroundColor: isCrisis ? "rgba(239, 68, 68, 0.1)" : isWarning ? "rgba(245, 158, 11, 0.1)" : "rgba(16, 185, 129, 0.1)",
+                              padding: "2px 6px",
+                              borderRadius: "4px",
+                              fontSize: "10.5px",
+                              fontWeight: "600",
+                              whiteSpace: "nowrap"
+                            }} className="text-truncate">
+                              {statusText}
+                            </span>
+                          </div>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px", fontSize: "11.5px", color: "var(--text-secondary)" }}>
+                            <div>Category: {biz.category}</div>
+                            <div>Health: <strong style={{ color: statusColor }}>{biz.currentHealth}%</strong></div>
+                            <div style={{ gridColumn: "span 2" }}>Revenue: <strong>₹{bizRevenue}L</strong></div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -969,84 +1037,154 @@ function DistrictMap({
 
               {/* District Table List */}
               <div className="districts-scrollbar-container" style={{ overflowY: "auto", maxHeight: "230px", border: "1px solid var(--border-color)", borderRadius: "8px" }}>
-                <table className="districts-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left" }}>
-                  <thead style={{ backgroundColor: "var(--bg-main)", position: "sticky", top: 0, borderBottom: "1px solid var(--border-color)", zIndex: 1 }}>
-                    <tr>
-                      <th style={{ padding: "8px 12px", color: "var(--text-secondary)", fontWeight: "600" }}>District</th>
-                      <th style={{ padding: "8px 12px", color: "var(--text-secondary)", fontWeight: "600", textAlign: "center" }}>Twins</th>
-                      <th style={{ padding: "8px 12px", color: "var(--text-secondary)", fontWeight: "600", textAlign: "center" }}>Avg Health</th>
-                      <th style={{ padding: "8px 12px", color: "var(--text-secondary)", fontWeight: "600", textAlign: "right" }}>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredNodes.map((node) => {
-                      const stats = districtStats[node.name] || { count: 0, averageHealth: 0, crises: 0 };
-                      const isSelected = selectedDistrict === node.name;
+                <div className="desktop-only-table">
+                  <table className="districts-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left" }}>
+                    <thead style={{ backgroundColor: "var(--bg-main)", position: "sticky", top: 0, borderBottom: "1px solid var(--border-color)", zIndex: 1 }}>
+                      <tr>
+                        <th style={{ padding: "8px 12px", color: "var(--text-secondary)", fontWeight: "600" }}>District</th>
+                        <th style={{ padding: "8px 12px", color: "var(--text-secondary)", fontWeight: "600", textAlign: "center" }}>Twins</th>
+                        <th style={{ padding: "8px 12px", color: "var(--text-secondary)", fontWeight: "600", textAlign: "center" }}>Avg Health</th>
+                        <th style={{ padding: "8px 12px", color: "var(--text-secondary)", fontWeight: "600", textAlign: "right" }}>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredNodes.map((node) => {
+                        const stats = districtStats[node.name] || { count: 0, averageHealth: 0, crises: 0 };
+                        const isSelected = selectedDistrict === node.name;
 
-                      let rowBg = "transparent";
-                      if (isSelected) rowBg = "var(--primary-light)";
+                        let rowBg = "transparent";
+                        if (isSelected) rowBg = "var(--primary-light)";
 
-                      let healthColor = "var(--color-green)";
-                      if (stats.averageHealth < 75) healthColor = "var(--color-red)";
-                      else if (stats.averageHealth < 85) healthColor = "var(--color-amber)";
+                        let healthColor = "var(--color-green)";
+                        if (stats.averageHealth < 75) healthColor = "var(--color-red)";
+                        else if (stats.averageHealth < 85) healthColor = "var(--color-amber)";
 
-                      return (
-                        <tr
-                          key={node.name}
-                          onClick={() => {
-                            const isSel = selectedDistrict === node.name;
-                            const nextDistrict = isSel ? null : node.name;
-                            onSelectDistrict(nextDistrict);
-                            
-                            if (nextDistrict) {
-                              const districtBiz = businesses.filter((b) => b.district === nextDistrict);
-                              if (districtBiz.length > 0) {
-                                onSelectBusinessId(districtBiz[0].id);
+                        return (
+                          <tr
+                            key={node.name}
+                            onClick={() => {
+                              const isSel = selectedDistrict === node.name;
+                              const nextDistrict = isSel ? null : node.name;
+                              onSelectDistrict(nextDistrict);
+                              
+                              if (nextDistrict) {
+                                const districtBiz = businesses.filter((b) => b.district === nextDistrict);
+                                if (districtBiz.length > 0) {
+                                  onSelectBusinessId(districtBiz[0].id);
+                                } else {
+                                  onSelectBusinessId(null);
+                                }
                               } else {
                                 onSelectBusinessId(null);
                               }
+                            }}
+                            style={{
+                              backgroundColor: rowBg,
+                              cursor: "pointer",
+                              borderBottom: "1px solid var(--border-color)",
+                              transition: "background 0.2s"
+                            }}
+                            className="district-row-hover"
+                          >
+                            <td style={{ padding: "8px 12px", color: "var(--text-primary)", fontWeight: isSelected ? "600" : "400" }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                <MapPin size={12} style={{ color: isSelected ? "var(--primary)" : "var(--text-muted)" }} />
+                                {node.name}
+                              </div>
+                            </td>
+                            <td style={{ padding: "8px 12px", textAlign: "center", color: "var(--text-secondary)" }}>{stats.count}</td>
+                            <td style={{ padding: "8px 12px", textAlign: "center" }}>
+                              <span style={{
+                                color: healthColor,
+                                fontWeight: "700",
+                                backgroundColor: healthColor === "var(--color-green)" ? "rgba(16, 185, 129, 0.15)" : healthColor === "var(--color-amber)" ? "rgba(245, 158, 11, 0.15)" : "rgba(239, 68, 68, 0.15)",
+                                padding: "2px 6px",
+                                borderRadius: "4px"
+                              }}>
+                                {stats.averageHealth}%
+                              </span>
+                            </td>
+                            <td style={{ padding: "8px 12px", textAlign: "right" }}>
+                              {stats.averageHealth < 75 ? (
+                                <span style={{ fontSize: "11px", color: "var(--color-red)", fontWeight: "600" }}>⚠️ Warning</span>
+                              ) : (
+                                <span style={{ fontSize: "11px", color: "var(--color-green)", fontWeight: "600" }}>✓ Optimal</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="mobile-only-cards" style={{ display: "none", flexDirection: "column", gap: "10px" }}>
+                  {filteredNodes.map((node) => {
+                    const stats = districtStats[node.name] || { count: 0, averageHealth: 0, crises: 0 };
+                    const isSelected = selectedDistrict === node.name;
+
+                    let cardBg = isSelected ? "var(--primary-light)" : "var(--bg-surface)";
+                    let healthColor = "var(--color-green)";
+                    let statusText = "✓ Optimal";
+                    if (stats.averageHealth < 75) {
+                      healthColor = "var(--color-red)";
+                      statusText = "⚠️ Warning";
+                    } else if (stats.averageHealth < 85) {
+                      healthColor = "var(--color-amber)";
+                      statusText = "⚠️ Warning";
+                    }
+
+                    return (
+                      <div
+                        key={node.name}
+                        onClick={() => {
+                          const isSel = selectedDistrict === node.name;
+                          const nextDistrict = isSel ? null : node.name;
+                          onSelectDistrict(nextDistrict);
+                          
+                          if (nextDistrict) {
+                            const districtBiz = businesses.filter((b) => b.district === nextDistrict);
+                            if (districtBiz.length > 0) {
+                              onSelectBusinessId(districtBiz[0].id);
                             } else {
                               onSelectBusinessId(null);
                             }
-                          }}
-                          style={{
-                            backgroundColor: rowBg,
-                            cursor: "pointer",
-                            borderBottom: "1px solid var(--border-color)",
-                            transition: "background 0.2s"
-                          }}
-                          className="district-row-hover"
-                        >
-                          <td style={{ padding: "8px 12px", color: "var(--text-primary)", fontWeight: isSelected ? "600" : "400" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                              <MapPin size={12} style={{ color: isSelected ? "var(--primary)" : "var(--text-muted)" }} />
-                              {node.name}
-                            </div>
-                          </td>
-                          <td style={{ padding: "8px 12px", textAlign: "center", color: "var(--text-secondary)" }}>{stats.count}</td>
-                          <td style={{ padding: "8px 12px", textAlign: "center" }}>
-                            <span style={{
-                              color: healthColor,
-                              fontWeight: "700",
-                              backgroundColor: healthColor === "var(--color-green)" ? "rgba(16, 185, 129, 0.15)" : healthColor === "var(--color-amber)" ? "rgba(245, 158, 11, 0.15)" : "rgba(239, 68, 68, 0.15)",
-                              padding: "2px 6px",
-                              borderRadius: "4px"
-                            }}>
-                              {stats.averageHealth}%
-                            </span>
-                          </td>
-                          <td style={{ padding: "8px 12px", textAlign: "right" }}>
-                            {stats.averageHealth < 75 ? (
-                              <span style={{ fontSize: "11px", color: "var(--color-red)", fontWeight: "600" }}>⚠️ Warning</span>
-                            ) : (
-                              <span style={{ fontSize: "11px", color: "var(--color-green)", fontWeight: "600" }}>✓ Optimal</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                          } else {
+                            onSelectBusinessId(null);
+                          }
+                        }}
+                        style={{
+                          padding: "12px",
+                          borderRadius: "8px",
+                          border: isSelected ? "1.5px solid var(--primary)" : "1px solid var(--border-color)",
+                          backgroundColor: cardBg,
+                          cursor: "pointer",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "6px"
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: "600", color: "var(--text-primary)" }}>
+                            <MapPin size={13} style={{ color: isSelected ? "var(--primary)" : "var(--text-muted)" }} />
+                            {node.name}
+                          </div>
+                          <span style={{ fontSize: "11px", color: healthColor, fontWeight: "600" }}>{statusText}</span>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px", fontSize: "11.5px", color: "var(--text-secondary)" }}>
+                          <div>Monitored: <strong>{stats.count} Twins</strong></div>
+                          <div>Avg Health: <strong style={{
+                            color: healthColor,
+                            backgroundColor: healthColor === "var(--color-green)" ? "rgba(16, 185, 129, 0.12)" : healthColor === "var(--color-amber)" ? "rgba(245, 158, 11, 0.12)" : "rgba(239, 68, 68, 0.12)",
+                            padding: "1px 4px",
+                            borderRadius: "4px"
+                          }}>{stats.averageHealth}%</strong></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
               </div>
             </div>
           )}
