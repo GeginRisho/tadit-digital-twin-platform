@@ -1414,8 +1414,11 @@ html {
   .map-hud-controls {
     order: 3 !important;
     position: relative !important;
+    top: auto !important;
     bottom: auto !important;
+    left: auto !important;
     right: auto !important;
+    transform: none !important;
     display: flex !important;
     flex-direction: row !important;
     justify-content: center !important;

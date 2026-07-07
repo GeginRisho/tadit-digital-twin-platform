@@ -57,17 +57,6 @@ export default function NotificationCenter({
     }
   };
 
-  const getSeverityClass = (severity) => {
-    switch (severity) {
-      case "high":
-        return "notif-critical";
-      case "medium":
-        return "notif-warning";
-      default:
-        return "notif-info";
-    }
-  };
-
   return (
     <div className="notification-center-container" ref={dropdownRef} style={{ position: "relative" }}>
       {/* Bell Trigger Button */}
@@ -272,125 +261,171 @@ export default function NotificationCenter({
                 <p style={{ margin: 0, fontSize: "13px" }}>No matching notifications.</p>
               </div>
             ) : (
-              filteredNotifications.map((notif) => (
-                <div
-                  key={notif.id}
-                  className={`notif-dropdown-item ${getSeverityClass(notif.severity)} ${!notif.isRead ? "unread" : ""}`}
-                  onTouchStart={(e) => {
-                    setSwipeX({ id: notif.id, startX: e.touches[0].clientX, offset: 0 });
-                  }}
-                  onTouchMove={(e) => {
-                    if (swipeX.id === notif.id) {
-                      const diffX = e.touches[0].clientX - swipeX.startX;
-                      if (diffX < 0) {
-                        setSwipeX((prev) => ({ ...prev, offset: Math.max(-120, diffX) })); // Cap swipe to -120px
-                      }
-                    }
-                  }}
-                  onTouchEnd={() => {
-                    if (swipeX.id === notif.id) {
-                      if (swipeX.offset < -80) {
-                        onDismissNotification(notif.id);
-                      }
-                      setSwipeX({ id: null, startX: 0, offset: 0 });
-                    }
-                  }}
-                  style={{
-                    padding: "12px 14px",
-                    borderRadius: "10px",
-                    margin: "8px 12px",
-                    border: "1px solid var(--border-color)",
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: "12px",
-                    backgroundColor: notif.isRead ? "var(--bg-surface)" : "var(--primary-light)",
-                    boxShadow: "var(--shadow-sm)",
-                    transform: swipeX.id === notif.id ? `translateX(${swipeX.offset}px)` : "none",
-                    transition: swipeX.id === null ? "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)" : "none",
-                    cursor: "grab",
-                    position: "relative"
-                  }}
-                >
-                  {/* Severity Icon */}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minWidth: "24px", marginTop: "2px" }}>
-                    {getSeverityIcon(notif.severity)}
-                  </div>
+              filteredNotifications.map((notif) => {
+                const notifTitle = notif.title || notif.type || "Notification Alert";
+                const notifMessage = notif.message || notif.description || "No notification details provided.";
+                const notifSource = notif.businessName || "System Cluster";
+                
+                let severityColor = "var(--primary)";
+                let severityBg = "rgba(99, 102, 241, 0.1)";
+                let severityText = "Info";
+                if (notif.severity === "high" || notif.severity === "critical") {
+                  severityColor = "var(--color-red)";
+                  severityBg = "rgba(239, 68, 68, 0.1)";
+                  severityText = "Critical";
+                } else if (notif.severity === "medium" || notif.severity === "warning") {
+                  severityColor = "var(--color-amber)";
+                  severityBg = "rgba(245, 158, 11, 0.1)";
+                  severityText = "Warning";
+                }
 
-                  {/* Body Text & Actions Column */}
-                  <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "4px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "6px" }}>
-                      <span style={{ fontSize: "12.5px", fontWeight: "700", color: "var(--text-primary)", overflowWrap: "anywhere", wordBreak: "break-word", flex: 1 }}>
-                        {notif.type}
-                      </span>
-                      <span style={{ fontSize: "9.5px", color: "var(--text-muted)", fontFamily: "var(--font-mono)", whiteSpace: "nowrap", marginTop: "2px" }}>
-                        {notif.timestamp}
-                      </span>
+                return (
+                  <div
+                    key={notif.id}
+                    className={`notif-dropdown-item notif-severity-${notif.severity} ${!notif.isRead ? "unread" : ""}`}
+                    onTouchStart={(e) => {
+                      setSwipeX({ id: notif.id, startX: e.touches[0].clientX, offset: 0 });
+                    }}
+                    onTouchMove={(e) => {
+                      if (swipeX.id === notif.id) {
+                        const diffX = e.touches[0].clientX - swipeX.startX;
+                        if (diffX < 0) {
+                          setSwipeX((prev) => ({ ...prev, offset: Math.max(-120, diffX) }));
+                        }
+                      }
+                    }}
+                    onTouchEnd={() => {
+                      if (swipeX.id === notif.id) {
+                        if (swipeX.offset < -80) {
+                          onDismissNotification(notif.id);
+                        }
+                        setSwipeX({ id: null, startX: 0, offset: 0 });
+                      }
+                    }}
+                    style={{
+                      padding: "12px 14px",
+                      borderRadius: "10px",
+                      margin: "8px 12px",
+                      border: "1px solid var(--border-color)",
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "12px",
+                      backgroundColor: notif.isRead ? "var(--bg-surface)" : "var(--primary-light)",
+                      boxShadow: "var(--shadow-sm)",
+                      transform: swipeX.id === notif.id ? `translateX(${swipeX.offset}px)` : "none",
+                      transition: swipeX.id === null ? "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)" : "none",
+                      cursor: "grab",
+                      position: "relative"
+                    }}
+                  >
+                    {/* Severity Icon Circle */}
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "32px",
+                      height: "32px",
+                      borderRadius: "50%",
+                      backgroundColor: severityBg,
+                      color: severityColor,
+                      flexShrink: 0,
+                      marginTop: "2px"
+                    }}>
+                      {getSeverityIcon(notif.severity)}
                     </div>
 
-                    <span style={{ fontSize: "11px", fontWeight: "600", color: "var(--primary)", display: "block" }}>
-                      {notif.businessName}
-                    </span>
+                    {/* Content Column */}
+                    <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "4px" }}>
+                      {/* Title & Time */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "6px" }}>
+                        <span style={{ fontSize: "12.5px", fontWeight: "700", color: "var(--text-primary)", overflowWrap: "anywhere", wordBreak: "break-word", flex: 1 }}>
+                          {notifTitle}
+                        </span>
+                        <span style={{ fontSize: "9.5px", color: "var(--text-muted)", fontFamily: "var(--font-mono)", whiteSpace: "nowrap", marginTop: "2px" }}>
+                          {notif.timestamp}
+                        </span>
+                      </div>
 
-                    <p style={{ 
-                      margin: 0, 
-                      fontSize: "11.5px", 
-                      color: "var(--text-secondary)", 
-                      lineHeight: "1.4", 
-                      wordBreak: "break-word", 
-                      overflowWrap: "anywhere",
-                      whiteSpace: "normal" 
-                    }}>
-                      {notif.description}
-                    </p>
+                      {/* Severity & Source metadata pills */}
+                      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px", margin: "2px 0" }}>
+                        <span style={{
+                          fontSize: "9px",
+                          fontWeight: "700",
+                          color: severityColor,
+                          backgroundColor: severityBg,
+                          padding: "1px 6px",
+                          borderRadius: "4px",
+                          textTransform: "uppercase"
+                        }}>
+                          {severityText}
+                        </span>
+                        <span style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: "500" }}>
+                          • Source: <span style={{ color: "var(--text-secondary)", fontWeight: "600" }}>{notifSource}</span>
+                        </span>
+                      </div>
 
-                    {/* Bottom Actions Row */}
-                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "8px", borderTop: "1px solid var(--border-color)", paddingTop: "8px" }}>
-                      {!notif.isRead && (
+                      {/* Description Message Body */}
+                      <p style={{
+                        margin: "4px 0 0 0",
+                        fontSize: "11.5px",
+                        color: "var(--text-secondary)",
+                        lineHeight: "1.4",
+                        wordBreak: "break-word",
+                        overflowWrap: "anywhere",
+                        whiteSpace: "normal"
+                      }}>
+                        {notifMessage}
+                      </p>
+
+                      {/* Actions Footer */}
+                      <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "8px", borderTop: "1px solid var(--border-color)", paddingTop: "8px" }}>
+                        {!notif.isRead && (
+                          <button
+                            onClick={() => onMarkRead(notif.id)}
+                            title="Mark as read"
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              background: "rgba(16, 185, 129, 0.08)",
+                              border: "1px solid rgba(16, 185, 129, 0.2)",
+                              borderRadius: "6px",
+                              padding: "4px 8px",
+                              fontSize: "11px",
+                              fontWeight: "600",
+                              color: "var(--color-green)",
+                              cursor: "pointer",
+                              transition: "background 0.2s"
+                            }}
+                          >
+                            <Check size={12} style={{ strokeWidth: 3 }} /> Mark Read
+                          </button>
+                        )}
                         <button
-                          onClick={() => onMarkRead(notif.id)}
-                          title="Mark as read"
+                          onClick={() => onDismissNotification(notif.id)}
+                          title="Dismiss alert"
                           style={{
                             display: "flex",
                             alignItems: "center",
                             gap: "4px",
-                            background: "rgba(16, 185, 129, 0.08)",
-                            border: "1px solid rgba(16, 185, 129, 0.2)",
+                            background: "rgba(239, 68, 68, 0.08)",
+                            border: "1px solid rgba(239, 68, 68, 0.2)",
                             borderRadius: "6px",
                             padding: "4px 8px",
                             fontSize: "11px",
                             fontWeight: "600",
-                            color: "var(--color-green)",
+                            color: "var(--color-red)",
                             cursor: "pointer",
                             transition: "background 0.2s"
                           }}
                         >
-                          <Check size={12} style={{ strokeWidth: 3 }} /> Mark Read
+                          <X size={12} style={{ strokeWidth: 3 }} /> Dismiss
                         </button>
-                      )}
-                      <button
-                        onClick={() => onDismissNotification(notif.id)}
-                        title="Dismiss alert"
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                          background: "rgba(239, 68, 68, 0.08)",
-                          border: "1px solid rgba(239, 68, 68, 0.2)",
-                          borderRadius: "6px",
-                          padding: "4px 8px",
-                          fontSize: "11px",
-                          fontWeight: "600",
-                          color: "var(--color-red)",
-                          cursor: "pointer",
-                          transition: "background 0.2s"
-                        }}
-                      >
-                        <X size={12} style={{ strokeWidth: 3 }} /> Dismiss
-                      </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 
