@@ -60,7 +60,55 @@ function DistrictMap({
 
   // Dynamic collision detection and positioning of district labels based on priority and zoom
   const processedNodes = useMemo(() => {
-    const sortedNodes = [...districtNodes].sort((a, b) => {
+    const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+
+    // 1. Prepare initial nodes with responsive radii
+    const preparedNodes = districtNodes.map(node => {
+      let r = node.r;
+      if (isMobile) {
+        r = node.name === "Chennai" ? 11 : node.name === "Coimbatore" || node.name === "Madurai" ? 9.5 : 6.5;
+      }
+      return {
+        ...node,
+        r,
+        x: node.x,
+        y: node.y
+      };
+    });
+
+    // 2. Resolve node-to-node overlaps dynamically (force displacement)
+    const iterations = 8;
+    const minSpacing = isMobile ? 3.0 : 4.0;
+    
+    for (let iter = 0; iter < iterations; iter++) {
+      for (let i = 0; i < preparedNodes.length; i++) {
+        for (let j = i + 1; j < preparedNodes.length; j++) {
+          const n1 = preparedNodes[i];
+          const n2 = preparedNodes[j];
+          
+          const dx = n2.x - n1.x;
+          const dy = n2.y - n1.y;
+          const dist = Math.hypot(dx, dy);
+          
+          const minDist = n1.r + n2.r + minSpacing;
+          
+          if (dist < minDist) {
+            const overlap = minDist - dist;
+            const forceX = dist > 0.1 ? (dx / dist) : 1;
+            const forceY = dist > 0.1 ? (dy / dist) : 0;
+            const pushAmount = overlap / 2;
+            
+            n1.x -= forceX * pushAmount;
+            n1.y -= forceY * pushAmount;
+            n2.x += forceX * pushAmount;
+            n2.y += forceY * pushAmount;
+          }
+        }
+      }
+    }
+
+    // 3. Sort for label priority (hovered/selected first)
+    const labelPriorityNodes = [...preparedNodes].sort((a, b) => {
       if (a.name === hoveredNode) return -1;
       if (b.name === hoveredNode) return 1;
       if (a.name === selectedDistrict) return -1;
@@ -68,35 +116,25 @@ function DistrictMap({
       return b.pop - a.pop;
     });
 
+    // 4. Place labels using the resolved coordinates
     const placedBoxes = [];
-    const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
-    
-    const mappedNodes = sortedNodes.map(node => {
+    const mappedNodes = labelPriorityNodes.map(node => {
       const isSelected = selectedDistrict === node.name;
       const isHovered = hoveredNode === node.name;
       const isLargest = topRankedNames.includes(node.name);
       
-      // Reduce node radius slightly on mobile viewports
-      let r = node.r;
-      if (isMobile) {
-        r = node.name === "Chennai" ? 11 : node.name === "Coimbatore" || node.name === "Madurai" ? 9.5 : 6.5;
-      }
-      
       let baseVisible = true;
       if (!isSelected && !isHovered) {
         if (isMobile) {
-          // On mobile screens, only show hovered, selected, or major cities by default
           if (!isLargest) {
             baseVisible = false;
           }
         } else {
-          // Desktop zoom thresholds
           if (zoom < 1.3 && node.pop < 2500000) baseVisible = false;
           else if (zoom < 1.7 && node.pop < 1500000) baseVisible = false;
         }
       }
 
-      // Responsive font sizing dynamically computed
       const baseFontLimit = isMobile ? 8.0 : 10.0;
       const minFontLimit = isMobile ? 5.5 : 6.5;
       const currentFontSize = Math.max(minFontLimit, Math.min(baseFontLimit, baseFontLimit / zoom));
@@ -124,7 +162,7 @@ function DistrictMap({
         for (const pos of positions) {
           let left = 0, top = 0;
           const spacing = 4;
-          const offset = r + spacing;
+          const offset = node.r + spacing;
           
           if (pos === "right") {
             left = node.x + offset;
@@ -149,7 +187,7 @@ function DistrictMap({
           };
           
           overlaps = placedBoxes.some(other => {
-            const padding = isMobile ? 4.0 : 2.0; // Dynamic safety padding margin
+            const padding = isMobile ? 4.0 : 2.0;
             return !(
               box.right + padding < other.left ||
               box.left - padding > other.right ||
@@ -168,7 +206,7 @@ function DistrictMap({
         if (overlaps) {
           if (isSelected || isHovered) {
             finalPos = "right";
-            const offset = r + 4;
+            const offset = node.r + 4;
             finalBox = {
               left: node.x + offset,
               top: node.y - fontHeight / 2,
@@ -188,19 +226,29 @@ function DistrictMap({
       
       return {
         ...node,
-        r,
         visible,
         labelPos: finalPos,
         fontSize: currentFontSize
       };
     });
 
+    // 5. Sort final nodes for drawing order (hovered/selected drawn last to render on top)
     return mappedNodes.sort((a, b) => {
+      const isSelA = selectedDistrict === a.name;
+      const isSelB = selectedDistrict === b.name;
+      const isHovA = hoveredNode === a.name;
+      const isHovB = hoveredNode === b.name;
+      
+      if (isHovA && !isHovB) return 1;
+      if (isHovB && !isHovA) return -1;
+      if (isSelA && !isSelB) return 1;
+      if (isSelB && !isSelA) return -1;
+      
       const idxA = officialDistricts.findIndex(d => d.name === a.name);
       const idxB = officialDistricts.findIndex(d => d.name === b.name);
       return idxA - idxB;
     });
-  }, [districtNodes, zoom, selectedDistrict, hoveredNode, topRankedNames]);
+  }, [zoom, selectedDistrict, hoveredNode, districtNodes, topRankedNames]);
 
   // System network topology connections between projected nodes
   const networkConnections = useMemo(() => [
@@ -566,8 +614,8 @@ function DistrictMap({
 
                 {/* Network Connections */}
                 {networkConnections.map((conn, idx) => {
-                  const fromNode = districtNodes.find((n) => n.name === conn.from);
-                  const toNode = districtNodes.find((n) => n.name === conn.to);
+                  const fromNode = processedNodes.find((n) => n.name === conn.from);
+                  const toNode = processedNodes.find((n) => n.name === conn.to);
                   if (!fromNode || !toNode) return null;
 
                   const fromStats = districtStats[fromNode.name] || { averageHealth: 90 };

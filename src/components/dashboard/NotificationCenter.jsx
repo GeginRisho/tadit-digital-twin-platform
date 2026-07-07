@@ -301,7 +301,7 @@ export default function NotificationCenter({
                     margin: "8px 12px",
                     border: "1px solid var(--border-color)",
                     display: "flex",
-                    alignItems: "center",
+                    alignItems: "flex-start",
                     gap: "12px",
                     backgroundColor: notif.isRead ? "var(--bg-surface)" : "var(--primary-light)",
                     boxShadow: "var(--shadow-sm)",
@@ -312,76 +312,82 @@ export default function NotificationCenter({
                   }}
                 >
                   {/* Severity Icon */}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minWidth: "32px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minWidth: "24px", marginTop: "2px" }}>
                     {getSeverityIcon(notif.severity)}
                   </div>
 
-                  {/* Body Text */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "2px", gap: "4px" }}>
-                      <span style={{ fontSize: "12.5px", fontWeight: "700", color: "var(--text-primary)", wordBreak: "break-all" }}>{notif.type}</span>
-                      <span style={{ fontSize: "9.5px", color: "var(--text-muted)", fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>
+                  {/* Body Text & Actions Column */}
+                  <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "6px" }}>
+                      <span style={{ fontSize: "12.5px", fontWeight: "700", color: "var(--text-primary)", overflowWrap: "anywhere", wordBreak: "break-word", flex: 1 }}>
+                        {notif.type}
+                      </span>
+                      <span style={{ fontSize: "9.5px", color: "var(--text-muted)", fontFamily: "var(--font-mono)", whiteSpace: "nowrap", marginTop: "2px" }}>
                         {notif.timestamp}
                       </span>
                     </div>
-                    <span style={{ fontSize: "11px", fontWeight: "600", color: "var(--primary)", display: "block", marginBottom: "3px" }}>
+
+                    <span style={{ fontSize: "11px", fontWeight: "600", color: "var(--primary)", display: "block" }}>
                       {notif.businessName}
                     </span>
-                    <p style={{ margin: 0, fontSize: "11.5px", color: "var(--text-secondary)", lineHeight: "1.4", wordBreak: "break-all", overflowWrap: "break-word" }}>
+
+                    <p style={{ 
+                      margin: 0, 
+                      fontSize: "11.5px", 
+                      color: "var(--text-secondary)", 
+                      lineHeight: "1.4", 
+                      wordBreak: "break-word", 
+                      overflowWrap: "anywhere",
+                      whiteSpace: "normal" 
+                    }}>
                       {notif.description}
                     </p>
-                  </div>
 
-                  {/* Actions Column */}
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "6px",
-                      alignItems: "center",
-                      justifyContent: "center"
-                    }}
-                  >
-                    {!notif.isRead && (
+                    {/* Bottom Actions Row */}
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "8px", borderTop: "1px solid var(--border-color)", paddingTop: "8px" }}>
+                      {!notif.isRead && (
+                        <button
+                          onClick={() => onMarkRead(notif.id)}
+                          title="Mark as read"
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            background: "rgba(16, 185, 129, 0.08)",
+                            border: "1px solid rgba(16, 185, 129, 0.2)",
+                            borderRadius: "6px",
+                            padding: "4px 8px",
+                            fontSize: "11px",
+                            fontWeight: "600",
+                            color: "var(--color-green)",
+                            cursor: "pointer",
+                            transition: "background 0.2s"
+                          }}
+                        >
+                          <Check size={12} style={{ strokeWidth: 3 }} /> Mark Read
+                        </button>
+                      )}
                       <button
-                        onClick={() => onMarkRead(notif.id)}
-                        title="Mark as read"
+                        onClick={() => onDismissNotification(notif.id)}
+                        title="Dismiss alert"
                         style={{
-                          background: "rgba(16, 185, 129, 0.1)",
-                          border: "1px solid rgba(16, 185, 129, 0.2)",
-                          borderRadius: "50%",
-                          width: "30px",
-                          height: "30px",
-                          cursor: "pointer",
-                          color: "var(--color-green)",
                           display: "flex",
                           alignItems: "center",
-                          justifyContent: "center",
+                          gap: "4px",
+                          background: "rgba(239, 68, 68, 0.08)",
+                          border: "1px solid rgba(239, 68, 68, 0.2)",
+                          borderRadius: "6px",
+                          padding: "4px 8px",
+                          fontSize: "11px",
+                          fontWeight: "600",
+                          color: "var(--color-red)",
+                          cursor: "pointer",
                           transition: "background 0.2s"
                         }}
                       >
-                        <Check size={14} style={{ strokeWidth: 3 }} />
+                        <X size={12} style={{ strokeWidth: 3 }} /> Dismiss
                       </button>
-                    )}
-                    <button
-                      onClick={() => onDismissNotification(notif.id)}
-                      title="Dismiss alert"
-                      style={{
-                        background: "rgba(239, 68, 68, 0.1)",
-                        border: "1px solid rgba(239, 68, 68, 0.2)",
-                        borderRadius: "50%",
-                        width: "30px",
-                        height: "30px",
-                        cursor: "pointer",
-                        color: "var(--color-red)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        transition: "background 0.2s"
-                      }}
-                    >
-                      <X size={14} style={{ strokeWidth: 3 }} />
-                    </button>
+                    </div>
                   </div>
                 </div>
               ))
