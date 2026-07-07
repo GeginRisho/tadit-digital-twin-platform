@@ -139,7 +139,7 @@ export default function NotificationCenter({
         >
           {/* Header */}
           <div
-            className="dropdown-header"
+            className="dropdown-header notification-center-header"
             style={{
               padding: "12px 16px",
               borderBottom: "1px solid var(--border-color)",
@@ -148,7 +148,7 @@ export default function NotificationCenter({
               alignItems: "center"
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }} className="header-title-section">
               <h3 style={{ margin: 0, fontSize: "14px", fontWeight: "600", color: "var(--text-primary)" }}>Alert Center</h3>
               {unreadCount > 0 && (
                 <span
@@ -165,7 +165,7 @@ export default function NotificationCenter({
                 </span>
               )}
             </div>
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "flex-end" }} className="header-actions-section">
               {unreadCount > 0 && (
                 <button
                   onClick={onMarkAllRead}
@@ -232,7 +232,7 @@ export default function NotificationCenter({
             </div>
 
             {/* Filter pills */}
-            <div style={{ display: "flex", gap: "4px" }}>
+            <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
               {["all", "critical", "warning", "info"].map((filter) => (
                 <button
                   key={filter}
@@ -288,7 +288,7 @@ export default function NotificationCenter({
                   <div style={{ marginTop: "3px" }}>{getSeverityIcon(notif.severity)}</div>
                   <div style={{ flex: 1, paddingRight: "20px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "2px" }}>
-                      <span style={{ fontSize: "12.5px", fontWeight: "600" }}>{notif.type}</span>
+                      <span style={{ fontSize: "12.5px", fontWeight: "600", wordBreak: "break-all" }}>{notif.type}</span>
                       <span style={{ fontSize: "10px", color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
                         {notif.timestamp}
                       </span>
@@ -296,7 +296,7 @@ export default function NotificationCenter({
                     <span style={{ fontSize: "11px", fontWeight: "600", color: "var(--primary)", display: "block", marginBottom: "2px" }}>
                       {notif.businessName}
                     </span>
-                    <p style={{ margin: 0, fontSize: "11.5px", color: "var(--text-secondary)", lineHeight: "1.4" }}>
+                    <p style={{ margin: 0, fontSize: "11.5px", color: "var(--text-secondary)", lineHeight: "1.4", wordBreak: "break-all", overflowWrap: "break-word" }}>
                       {notif.description}
                     </p>
                   </div>

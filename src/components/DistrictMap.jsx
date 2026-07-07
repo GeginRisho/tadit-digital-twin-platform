@@ -53,6 +53,14 @@ function DistrictMap({
     });
   }, []);
 
+  // Predetermined top 8 largest districts in population to preserve on mobile viewports
+  const topRankedNames = useMemo(() => {
+    return [...officialDistricts]
+      .sort((a, b) => b.pop - a.pop)
+      .slice(0, 8)
+      .map(d => d.name);
+  }, []);
+
   // Dynamic collision detection and positioning of district labels based on priority and zoom
   const processedNodes = useMemo(() => {
     const sortedNodes = [...districtNodes].sort((a, b) => {
@@ -64,15 +72,25 @@ function DistrictMap({
     });
 
     const placedBoxes = [];
+    const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
     
     const mappedNodes = sortedNodes.map(node => {
       const isSelected = selectedDistrict === node.name;
       const isHovered = hoveredNode === node.name;
+      const isLargest = topRankedNames.includes(node.name);
       
       let baseVisible = true;
       if (!isSelected && !isHovered) {
-        if (zoom < 1.3 && node.pop < 2500000) baseVisible = false;
-        else if (zoom < 1.7 && node.pop < 1500000) baseVisible = false;
+        if (isMobile) {
+          // On mobile screens, only show hovered, selected, or top N largest districts by default
+          if (!isLargest) {
+            baseVisible = false;
+          }
+        } else {
+          // Desktop zoom thresholds
+          if (zoom < 1.3 && node.pop < 2500000) baseVisible = false;
+          else if (zoom < 1.7 && node.pop < 1500000) baseVisible = false;
+        }
       }
 
       const currentFontSize = Math.max(6.5, Math.min(10, 10 / zoom));
@@ -125,7 +143,7 @@ function DistrictMap({
           };
           
           overlaps = placedBoxes.some(other => {
-            const padding = 1.5;
+            const padding = 2.0; // Slightly larger padding for better separation
             return !(
               box.right + padding < other.left ||
               box.left - padding > other.right ||
@@ -142,7 +160,7 @@ function DistrictMap({
         }
         
         if (overlaps) {
-          if (isSelected || isHovered || (zoom >= 1.7 && node.pop > 2500000)) {
+          if (isSelected || isHovered) {
             finalPos = "right";
             const offset = node.r + 4;
             finalBox = {
@@ -175,7 +193,7 @@ function DistrictMap({
       const idxB = officialDistricts.findIndex(d => d.name === b.name);
       return idxA - idxB;
     });
-  }, [districtNodes, zoom, selectedDistrict, hoveredNode]);
+  }, [districtNodes, zoom, selectedDistrict, hoveredNode, topRankedNames]);
 
   // System network topology connections between projected nodes
   const networkConnections = useMemo(() => [
@@ -450,7 +468,7 @@ function DistrictMap({
         </div>
       </div>
 
-      <div className="map-grid" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "24px" }}>
+      <div className="map-grid">
         {/* SVG Network Map container */}
         <div 
           className="map-svg-container" 
@@ -475,93 +493,30 @@ function DistrictMap({
           {/* Zoom & Screen HUD Controls */}
           <div 
             className="map-hud-controls" 
-            style={{ 
-              position: "absolute", 
-              top: "12px", 
-              right: "12px", 
-              display: "flex", 
-              flexDirection: "column", 
-              gap: "6px", 
-              zIndex: 10 
-            }}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
             <button
               onClick={handleZoomIn}
               aria-label="Zoom In"
-              style={{
-                width: "32px",
-                height: "32px",
-                borderRadius: "6px",
-                backgroundColor: "var(--bg-surface)",
-                border: "1px solid var(--border-color)",
-                color: "var(--text-primary)",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: "bold",
-                boxShadow: "var(--shadow-sm)"
-              }}
             >
               <Plus size={16} />
             </button>
             <button
               onClick={handleZoomOut}
               aria-label="Zoom Out"
-              style={{
-                width: "32px",
-                height: "32px",
-                borderRadius: "6px",
-                backgroundColor: "var(--bg-surface)",
-                border: "1px solid var(--border-color)",
-                color: "var(--text-primary)",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: "bold",
-                boxShadow: "var(--shadow-sm)"
-              }}
             >
               <Minus size={16} />
             </button>
             <button
               onClick={handleResetView}
               aria-label="Reset View"
-              style={{
-                width: "32px",
-                height: "32px",
-                borderRadius: "6px",
-                backgroundColor: "var(--bg-surface)",
-                border: "1px solid var(--border-color)",
-                color: "var(--text-primary)",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "var(--shadow-sm)"
-              }}
             >
               <RotateCcw size={14} />
             </button>
             <button
               onClick={toggleFullscreen}
               aria-label="Toggle Fullscreen"
-              style={{
-                width: "32px",
-                height: "32px",
-                borderRadius: "6px",
-                backgroundColor: "var(--bg-surface)",
-                border: "1px solid var(--border-color)",
-                color: "var(--text-primary)",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "var(--shadow-sm)"
-              }}
             >
               {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
             </button>
@@ -570,6 +525,7 @@ function DistrictMap({
           <svg 
             ref={svgRef}
             viewBox="0 0 400 500" 
+            preserveAspectRatio="xMidYMid meet"
             className="tn-network-map" 
             style={{ 
               width: "100%", 
@@ -785,7 +741,7 @@ function DistrictMap({
             </div>
           )}
 
-          <div style={{ position: "absolute", bottom: "8px", left: "12px", fontSize: "11px", color: "var(--text-muted)", display: "flex", gap: "10px" }}>
+          <div className="map-legend">
             <span>🔴 High Risk</span>
             <span>🟡 Med Risk</span>
             <span>🟢 Stable</span>
