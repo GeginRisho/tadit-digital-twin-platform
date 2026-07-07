@@ -53,6 +53,130 @@ function DistrictMap({
     });
   }, []);
 
+  // Dynamic collision detection and positioning of district labels based on priority and zoom
+  const processedNodes = useMemo(() => {
+    const sortedNodes = [...districtNodes].sort((a, b) => {
+      if (a.name === hoveredNode) return -1;
+      if (b.name === hoveredNode) return 1;
+      if (a.name === selectedDistrict) return -1;
+      if (b.name === selectedDistrict) return 1;
+      return b.pop - a.pop;
+    });
+
+    const placedBoxes = [];
+    
+    const mappedNodes = sortedNodes.map(node => {
+      const isSelected = selectedDistrict === node.name;
+      const isHovered = hoveredNode === node.name;
+      
+      let baseVisible = true;
+      if (!isSelected && !isHovered) {
+        if (zoom < 1.3 && node.pop < 2500000) baseVisible = false;
+        else if (zoom < 1.7 && node.pop < 1500000) baseVisible = false;
+      }
+
+      const currentFontSize = Math.max(6.5, Math.min(10, 10 / zoom));
+      const fontWidth = currentFontSize * 0.55;
+      const fontHeight = currentFontSize;
+      
+      const labelText = node.name;
+      const labelWidth = labelText.length * fontWidth;
+      
+      const positions = [node.labelPos, "right", "left", "top", "bottom"];
+      
+      if (node.name === "Chennai") positions.unshift("right");
+      else if (node.name === "Tiruvallur") positions.unshift("left");
+      else if (node.name === "Kancheepuram") positions.unshift("bottom");
+      else if (node.name === "Chengalpattu") positions.unshift("right");
+      else if (node.name === "Ranipet") positions.unshift("top");
+      else if (node.name === "Vellore") positions.unshift("left");
+
+      let finalPos = node.labelPos;
+      let finalBox = null;
+      let overlaps = false;
+      let visible = baseVisible;
+
+      if (visible) {
+        for (const pos of positions) {
+          let left = 0, top = 0;
+          const spacing = 4;
+          const offset = node.r + spacing;
+          
+          if (pos === "right") {
+            left = node.x + offset;
+            top = node.y - fontHeight / 2;
+          } else if (pos === "left") {
+            left = node.x - offset - labelWidth;
+            top = node.y - fontHeight / 2;
+          } else if (pos === "top") {
+            left = node.x - labelWidth / 2;
+            top = node.y - offset - fontHeight;
+          } else if (pos === "bottom") {
+            left = node.x - labelWidth / 2;
+            top = node.y + offset + 8;
+          }
+          
+          const box = {
+            left,
+            top,
+            right: left + labelWidth,
+            bottom: top + fontHeight,
+            name: node.name
+          };
+          
+          overlaps = placedBoxes.some(other => {
+            const padding = 1.5;
+            return !(
+              box.right + padding < other.left ||
+              box.left - padding > other.right ||
+              box.bottom + padding < other.top ||
+              box.top - padding > other.bottom
+            );
+          });
+          
+          if (!overlaps) {
+            finalPos = pos;
+            finalBox = box;
+            break;
+          }
+        }
+        
+        if (overlaps) {
+          if (isSelected || isHovered || (zoom >= 1.7 && node.pop > 2500000)) {
+            finalPos = "right";
+            const offset = node.r + 4;
+            finalBox = {
+              left: node.x + offset,
+              top: node.y - fontHeight / 2,
+              right: node.x + offset + labelWidth,
+              bottom: node.y + fontHeight / 2,
+              name: node.name
+            };
+          } else {
+            visible = false;
+          }
+        }
+      }
+      
+      if (visible && finalBox) {
+        placedBoxes.push(finalBox);
+      }
+      
+      return {
+        ...node,
+        visible,
+        labelPos: finalPos,
+        fontSize: currentFontSize
+      };
+    });
+
+    return mappedNodes.sort((a, b) => {
+      const idxA = officialDistricts.findIndex(d => d.name === a.name);
+      const idxB = officialDistricts.findIndex(d => d.name === b.name);
+      return idxA - idxB;
+    });
+  }, [districtNodes, zoom, selectedDistrict, hoveredNode]);
+
   // System network topology connections between projected nodes
   const networkConnections = useMemo(() => [
     { from: "Chennai", to: "Tiruvallur" },
@@ -539,7 +663,7 @@ function DistrictMap({
               })}
 
               {/* District Nodes */}
-              {districtNodes.map((node) => {
+              {processedNodes.map((node) => {
                 const stats = districtStats[node.name] || { count: 0, averageHealth: 100, crises: 0 };
                 const isSelected = selectedDistrict === node.name;
                 const isHovered = hoveredNode === node.name;
@@ -609,20 +733,22 @@ function DistrictMap({
                     <circle r={node.r - 8 > 4 ? node.r - 8 : 4} fill={nodeColor} />
 
                     {/* Text Label */}
-                    <text
-                      x={node.labelPos === "left" ? -(node.r + 6) : node.labelPos === "right" ? node.r + 6 : 0}
-                      y={node.labelPos === "top" ? -(node.r + 6) : node.labelPos === "bottom" ? node.r + 14 : 4}
-                      textAnchor={node.labelPos === "left" ? "end" : node.labelPos === "right" ? "start" : "middle"}
-                      fill={isSelected ? "var(--text-primary)" : "var(--text-secondary)"}
-                      fontWeight={isSelected ? "700" : "500"}
-                      fontSize="9.5px"
-                      style={{
-                        fontFamily: "var(--font-sans)",
-                        userSelect: "none"
-                      }}
-                    >
-                      {node.name}
-                    </text>
+                    {node.visible && (
+                      <text
+                        x={node.labelPos === "left" ? -(node.r + 6) : node.labelPos === "right" ? node.r + 6 : 0}
+                        y={node.labelPos === "top" ? -(node.r + 6) : node.labelPos === "bottom" ? node.r + 14 : 4}
+                        textAnchor={node.labelPos === "left" ? "end" : node.labelPos === "right" ? "start" : "middle"}
+                        fill={isSelected ? "var(--text-primary)" : "var(--text-secondary)"}
+                        fontWeight={isSelected ? "700" : "500"}
+                        fontSize={`${node.fontSize}px`}
+                        style={{
+                          fontFamily: "var(--font-sans)",
+                          userSelect: "none"
+                        }}
+                      >
+                        {node.name}
+                      </text>
+                    )}
                   </g>
                 );
               })}

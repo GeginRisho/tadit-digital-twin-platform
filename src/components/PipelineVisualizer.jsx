@@ -140,96 +140,133 @@ export default function PipelineVisualizer({
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.3fr 0.9fr", gap: "24px", marginBottom: "24px" }}>
-        {/* Horizontal SVG Flowchart */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px", backgroundColor: "var(--bg-main)", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-color)", overflowX: "auto" }}>
-          <span style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-secondary)", display: "block" }}>
-            Ref: Click pipeline nodes to inspect data schemas & live values
-          </span>
-          <svg viewBox="0 0 550 140" style={{ width: "100%", minWidth: "480px" }}>
-            {/* Flow Connecting Cables */}
-            {nodes.slice(0, -1).map((node, idx) => {
-              const nextNode = nodes[idx + 1];
-              const isWarning = node.id === "spark" && sparkWindow.length > 8;
-              return (
-                <g key={idx}>
-                  <path
-                    d={`M ${node.x + 18} ${node.y} L ${nextNode.x - 18} ${node.y}`}
-                    stroke={isWarning ? "var(--color-red)" : "var(--border-color)"}
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                  />
-                  {/* Glowing Flow Packets Animation */}
-                  <circle r="3.5" fill={isWarning ? "var(--color-red)" : "var(--primary)"}>
-                    <animateMotion
-                      path={`M ${node.x + 18} ${node.y} L ${nextNode.x - 18} ${node.y}`}
-                      begin="0s"
-                      dur="2.4s"
-                      repeatCount="indefinite"
+      <div className="pipeline-main-layout">
+        {/* Horizontal SVG Flowchart / Nodes wrapper */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          
+          {/* SVG Flowchart (scrollable container) */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", backgroundColor: "var(--bg-main)", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-color)", overflowX: "auto" }}>
+            <span style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-secondary)", display: "block" }}>
+              Ref: Click pipeline nodes to inspect data schemas & live values
+            </span>
+            <svg viewBox="0 0 550 140" style={{ width: "100%", minWidth: "550px" }}>
+              {/* Flow Connecting Cables */}
+              {nodes.slice(0, -1).map((node, idx) => {
+                const nextNode = nodes[idx + 1];
+                const isWarning = node.id === "spark" && sparkWindow.length > 8;
+                return (
+                  <g key={idx}>
+                    <path
+                      d={`M ${node.x + 18} ${node.y} L ${nextNode.x - 18} ${node.y}`}
+                      stroke={isWarning ? "var(--color-red)" : "var(--border-color)"}
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
                     />
-                  </circle>
-                  <circle r="3.5" fill={isWarning ? "var(--color-red)" : "var(--secondary)"}>
-                    <animateMotion
-                      path={`M ${node.x + 18} ${node.y} L ${nextNode.x - 18} ${node.y}`}
-                      begin="0.8s"
-                      dur="2.4s"
-                      repeatCount="indefinite"
-                    />
-                  </circle>
-                  <circle r="3.5" fill={isWarning ? "var(--color-red)" : "var(--primary)"}>
-                    <animateMotion
-                      path={`M ${node.x + 18} ${node.y} L ${nextNode.x - 18} ${node.y}`}
-                      begin="1.6s"
-                      dur="2.4s"
-                      repeatCount="indefinite"
-                    />
-                  </circle>
-                </g>
-              );
-            })}
+                    {/* Glowing Flow Packets Animation */}
+                    <circle r="3.5" fill={isWarning ? "var(--color-red)" : "var(--primary)"}>
+                      <animateMotion
+                        path={`M ${node.x + 18} ${node.y} L ${nextNode.x - 18} ${node.y}`}
+                        begin="0s"
+                        dur="2.4s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                    <circle r="3.5" fill={isWarning ? "var(--color-red)" : "var(--secondary)"}>
+                      <animateMotion
+                        path={`M ${node.x + 18} ${node.y} L ${nextNode.x - 18} ${node.y}`}
+                        begin="0.8s"
+                        dur="2.4s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                    <circle r="3.5" fill={isWarning ? "var(--color-red)" : "var(--primary)"}>
+                      <animateMotion
+                        path={`M ${node.x + 18} ${node.y} L ${nextNode.x - 18} ${node.y}`}
+                        begin="1.6s"
+                        dur="2.4s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                  </g>
+                );
+              })}
 
-            {/* Pipeline Interactive Nodes */}
+              {/* Pipeline Interactive Nodes */}
+              {nodes.map((node) => {
+                const isSelected = selectedNode === node.id;
+
+                let nodeColor = "var(--primary)";
+                if (node.id === "spark" && sparkWindow.length > 8) nodeColor = "var(--color-red)";
+                else if (node.id === "redis") nodeColor = "var(--color-amber)";
+
+                return (
+                  <g
+                    key={node.id}
+                    transform={`translate(${node.x}, ${node.y})`}
+                    onClick={() => setSelectedNode(node.id)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <circle
+                      r="20"
+                      fill={nodeColor}
+                      opacity={isSelected ? 0.22 : 0}
+                      style={{ transition: "all 0.2s" }}
+                    />
+                    <circle
+                      r="15"
+                      fill="var(--bg-surface)"
+                      stroke={isSelected ? nodeColor : "var(--border-color)"}
+                      strokeWidth={isSelected ? "3" : "2"}
+                    />
+                    <circle r="6" fill={nodeColor} />
+                    
+                    <text
+                      y="32"
+                      textAnchor="middle"
+                      fontSize="9px"
+                      fontWeight="700"
+                      fill={isSelected ? "var(--text-primary)" : "var(--text-secondary)"}
+                    >
+                      {node.name.split(". ")[1].split(" ")[0]}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+
+          {/* Mobile Stacked Node Cards (Visible only on mobile) */}
+          <div className="mobile-only-cards" style={{ display: "none", flexDirection: "column", gap: "10px" }}>
             {nodes.map((node) => {
               const isSelected = selectedNode === node.id;
-
               let nodeColor = "var(--primary)";
               if (node.id === "spark" && sparkWindow.length > 8) nodeColor = "var(--color-red)";
               else if (node.id === "redis") nodeColor = "var(--color-amber)";
 
               return (
-                <g
+                <div
                   key={node.id}
-                  transform={`translate(${node.x}, ${node.y})`}
                   onClick={() => setSelectedNode(node.id)}
-                  style={{ cursor: "pointer" }}
+                  style={{
+                    padding: "12px 16px",
+                    borderRadius: "8px",
+                    border: `1.5px solid ${isSelected ? nodeColor : "var(--border-color)"}`,
+                    backgroundColor: isSelected ? "var(--primary-light)" : "var(--bg-surface)",
+                    cursor: "pointer",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center"
+                  }}
                 >
-                  <circle
-                    r="20"
-                    fill={nodeColor}
-                    opacity={isSelected ? 0.22 : 0}
-                    style={{ transition: "all 0.2s" }}
-                  />
-                  <circle
-                    r="15"
-                    fill="var(--bg-surface)"
-                    stroke={isSelected ? nodeColor : "var(--border-color)"}
-                    strokeWidth={isSelected ? "3" : "2"}
-                  />
-                  <circle r="6" fill={nodeColor} />
-                  
-                  <text
-                    y="32"
-                    textAnchor="middle"
-                    fontSize="9px"
-                    fontWeight="700"
-                    fill={isSelected ? "var(--text-primary)" : "var(--text-secondary)"}
-                  >
-                    {node.name.split(". ")[1].split(" ")[0]}
-                  </text>
-                </g>
+                  <div>
+                    <strong style={{ fontSize: "13.5px", color: isSelected ? nodeColor : "var(--text-primary)" }}>{node.name}</strong>
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{node.tech}</div>
+                  </div>
+                  <span style={{ fontSize: "11.5px", color: "var(--text-secondary)", fontWeight: "600" }}>{node.throughput}</span>
+                </div>
               );
             })}
-          </svg>
+          </div>
         </div>
 
         {/* Node Inspector Panel */}
@@ -271,7 +308,9 @@ export default function PipelineVisualizer({
                   fontSize: "10.5px",
                   fontFamily: "var(--font-mono)",
                   overflowX: "auto",
-                  maxHeight: "130px"
+                  maxHeight: "130px",
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-all"
                 }}>
                   {activePayload.schema}
                 </pre>

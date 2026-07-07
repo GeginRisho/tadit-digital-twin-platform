@@ -277,7 +277,7 @@ export default function BusinessProfile({
         </div>
 
         {/* Tab Selection */}
-        <div style={{ display: "flex", borderBottom: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)", padding: "0 16px" }}>
+        <div style={{ display: "flex", overflowX: "auto", whiteSpace: "nowrap", borderBottom: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)", padding: "0 16px" }}>
           {[
             { id: "overview", label: "Overview" },
             { id: "analytics", label: "Analytics & Predict" },
@@ -296,7 +296,8 @@ export default function BusinessProfile({
                 color: activeTab === tab.id ? "var(--primary)" : "var(--text-secondary)",
                 borderBottom: activeTab === tab.id ? "2.5px solid var(--primary)" : "2.5px solid transparent",
                 cursor: "pointer",
-                transition: "all 0.2s"
+                transition: "all 0.2s",
+                flexShrink: 0
               }}
             >
               {tab.label}

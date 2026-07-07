@@ -187,6 +187,18 @@ export default function App() {
     }
   }, [toast]);
 
+  // Modal background scrolling lock
+  useEffect(() => {
+    if (isFormModalOpen || isDeleteModalOpen || isShortcutsOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isFormModalOpen, isDeleteModalOpen, isShortcutsOpen]);
+
   // Form Validation Logic
   const validateForm = () => {
     const errors = {};
@@ -1238,7 +1250,7 @@ export default function App() {
                 display: "flex",
                 alignItems: "center"
               }}
-              className="btn-playback"
+              className="btn-playback header-shortcut-btn"
             >
               <Keyboard size={18} />
             </button>
@@ -1584,7 +1596,7 @@ export default function App() {
             </div>
 
             {/* Custom SVG Analytics Charts Grid */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
+            <div className="analytics-charts-grid">
               
               {/* Chart 1: Revenue prediction & historical monthly */}
               <div className="card" style={{ padding: "16px" }}>
@@ -2083,7 +2095,7 @@ export default function App() {
 
             {/* Datatable Grid */}
             <div className="table-responsive-wrapper" style={{ overflowX: "auto" }}>
-              <div>
+              <div className="desktop-only-table">
                 <table className="districts-table" style={{ fontSize: "13px" }}>
                   <thead>
                     <tr>
@@ -2161,6 +2173,92 @@ export default function App() {
                 </table>
               </div>
 
+              {/* Mobile Card Layout */}
+              <div className="mobile-only-cards">
+                {paginatedBusinesses.map((biz) => {
+                  let healthColor = "var(--color-green)";
+                  if (biz.currentHealth < 75) healthColor = "var(--color-red)";
+                  else if (biz.currentHealth < 85) healthColor = "var(--color-amber)";
+
+                  return (
+                    <div 
+                      key={biz.id} 
+                      className="card mobile-business-card"
+                      onClick={() => handleSelectBusiness(biz.id)}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "12px",
+                        padding: "16px",
+                        cursor: "pointer",
+                        border: "1px solid var(--border-color)",
+                        borderRadius: "12px",
+                        backgroundColor: "var(--bg-card)"
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <h4 className="text-truncate" style={{ margin: 0, fontSize: "14px", fontWeight: "700" }}>{biz.name}</h4>
+                          <span style={{ fontSize: "11px", color: "var(--text-muted)", display: "block", marginTop: "2px" }}>Category: {biz.category}</span>
+                        </div>
+                        <span style={{
+                          color: healthColor,
+                          fontWeight: "700",
+                          backgroundColor: healthColor === "var(--color-green)" ? "rgba(16, 185, 129, 0.12)" : healthColor === "var(--color-amber)" ? "rgba(245, 158, 11, 0.12)" : "rgba(239, 68, 68, 0.12)",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          fontSize: "11.5px",
+                          whiteSpace: "nowrap"
+                        }}>
+                          {biz.currentHealth}% Health
+                        </span>
+                      </div>
+
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "12px", color: "var(--text-secondary)" }}>
+                        <div className="text-truncate">
+                          <strong>Owner:</strong> {biz.owner || "N/A"}
+                        </div>
+                        <div className="text-truncate">
+                          <strong>District:</strong> {biz.district}
+                        </div>
+                        <div style={{ gridColumn: "span 2" }} className="text-break">
+                          <strong>GST:</strong> <span style={{ fontFamily: "var(--font-mono)", fontSize: "11.5px" }}>{biz.gstNumber}</span>
+                        </div>
+                        <div style={{ gridColumn: "span 2" }} className="text-truncate">
+                          <strong>PIN:</strong> <span style={{ fontFamily: "var(--font-mono)" }}>{biz.pincode}</span>
+                        </div>
+                      </div>
+
+                      <div style={{ borderTop: "1px solid var(--border-color)", paddingTop: "10px", marginTop: "4px" }}>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectBusiness(biz.id);
+                          }}
+                          style={{
+                            border: "1px solid var(--primary)",
+                            backgroundColor: "var(--primary-light)",
+                            color: "var(--primary)",
+                            padding: "8px 12px",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                            fontSize: "12.5px",
+                            fontWeight: "700",
+                            width: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center"
+                          }}
+                        >
+                          Sync Twin
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
               {/* Pagination controls footer */}
               {totalDirPages > 1 && (
                 <div style={{
@@ -2206,7 +2304,6 @@ export default function App() {
                   </button>
                 </div>
               )}
-            </div>
           </main>
         )}
 
@@ -2345,7 +2442,7 @@ export default function App() {
 
             {/* Datatable */}
             <div className="table-responsive-wrapper" style={{ overflowX: "auto" }}>
-              <div>
+              <div className="desktop-only-table">
                 <table className="districts-table" style={{ fontSize: "13px" }}>
                   <thead>
                     <tr>
@@ -2464,7 +2561,129 @@ export default function App() {
                 </table>
               </div>
 
-              {/* Pagination controls footer */}
+              {/* Mobile Card Layout */}
+              <div className="mobile-only-cards">
+                {paginatedMgtBusinesses.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "32px", color: "var(--text-muted)", width: "100%" }}>
+                    No matching digital twins found. Click "Add Business Twin" to register one.
+                  </div>
+                ) : (
+                  paginatedMgtBusinesses.map((biz) => {
+                    let healthColor = "var(--color-green)";
+                    if (biz.currentHealth < 75) healthColor = "var(--color-red)";
+                    else if (biz.currentHealth < 85) healthColor = "var(--color-amber)";
+
+                    return (
+                      <div 
+                        key={biz.id} 
+                        className="card mobile-business-card"
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "12px",
+                          padding: "16px",
+                          border: "1px solid var(--border-color)",
+                          borderRadius: "12px",
+                          backgroundColor: "var(--bg-card)"
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <h4 className="text-truncate" style={{ margin: 0, fontSize: "14px", fontWeight: "700" }}>{biz.name}</h4>
+                            <span style={{ fontSize: "11px", color: "var(--text-muted)", display: "block", marginTop: "2px" }}>ID: {biz.id} | Category: {biz.category}</span>
+                          </div>
+                          <span style={{
+                            color: healthColor,
+                            fontWeight: "700",
+                            backgroundColor: healthColor === "var(--color-green)" ? "rgba(16, 185, 129, 0.12)" : healthColor === "var(--color-amber)" ? "rgba(245, 158, 11, 0.12)" : "rgba(239, 68, 68, 0.12)",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            fontSize: "11.5px",
+                            whiteSpace: "nowrap"
+                          }}>
+                            {biz.currentHealth}% Health
+                          </span>
+                        </div>
+
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "12px", color: "var(--text-secondary)" }}>
+                          <div className="text-truncate">
+                            <strong>Owner:</strong> {biz.owner}
+                          </div>
+                          <div className="text-truncate">
+                            <strong>District:</strong> {biz.district}
+                          </div>
+                          <div style={{ gridColumn: "span 2" }} className="text-break">
+                            <strong>Email:</strong> {biz.email}
+                          </div>
+                          <div style={{ gridColumn: "span 2" }} className="text-break">
+                            <strong>GST:</strong> <span style={{ fontFamily: "var(--font-mono)", fontSize: "11.5px" }}>{biz.gstNumber}</span>
+                          </div>
+                          <div style={{ gridColumn: "span 2" }} className="text-truncate">
+                            <strong>Reg:</strong> <span style={{ fontFamily: "var(--font-mono)" }}>{biz.registrationNo}</span>
+                          </div>
+                        </div>
+
+                        <div style={{ 
+                          borderTop: "1px solid var(--border-color)", 
+                          paddingTop: "10px", 
+                          marginTop: "4px", 
+                          display: "flex", 
+                          justifyContent: "flex-end", 
+                          gap: "10px" 
+                        }}>
+                          <button
+                            onClick={() => handleEditClick(biz)}
+                            title="Edit Business Details"
+                            style={{
+                              border: "1px solid var(--border-color)",
+                              backgroundColor: "var(--bg-surface)",
+                              color: "var(--primary)",
+                              padding: "8px 16px",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              flex: 1,
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "6px",
+                              fontSize: "12.5px",
+                              fontWeight: "600"
+                            }}
+                            className="btn-playback"
+                          >
+                            <Edit3 size={13} /> Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(biz.id)}
+                            title="De-register Business"
+                            style={{
+                              border: "1px solid rgba(239, 68, 68, 0.2)",
+                              backgroundColor: "var(--bg-surface)",
+                              color: "var(--color-red)",
+                              padding: "8px 16px",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              flex: 1,
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "6px",
+                              fontSize: "12.5px",
+                              fontWeight: "600"
+                            }}
+                            className="btn-playback"
+                          >
+                            <Trash2 size={13} /> Delete
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Pagination controls footer */}
               {totalMgtPages > 1 && (
                 <div style={{
                   padding: "12px 16px",
@@ -2509,7 +2728,6 @@ export default function App() {
                   </button>
                 </div>
               )}
-            </div>
           </main>
         )}
 
@@ -2528,7 +2746,7 @@ export default function App() {
       {/* Form Modal for Add / Edit Business */}
       {isFormModalOpen && (
         <div className="modal-overlay" style={{ zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", overflowY: "auto", padding: "20px" }} onClick={() => setIsFormModalOpen(false)}>
-          <div className="modal-content" style={{ width: "100%", maxWidth: "800px", display: "flex", flexDirection: "column", gap: "16px", maxHeight: "90vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content form-modal-content" onClick={(e) => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-color)", paddingBottom: "12px" }}>
               <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "var(--text-primary)" }}>
                 {formMode === "add" ? "Register New Business Twin" : `Edit Twin: ${formData.name}`}
@@ -2542,7 +2760,8 @@ export default function App() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveBusiness} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            <form onSubmit={handleSaveBusiness} style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
+              <div className="form-scroll-body" style={{ flex: 1, overflowY: "auto", paddingRight: "4px", paddingBottom: "16px", display: "flex", flexDirection: "column", gap: "20px" }}>
               {/* Form Grid sections */}
               <div className="mgt-form-grid">
                 
@@ -2815,8 +3034,10 @@ export default function App() {
                 </div>
               </div>
 
+              </div> {/* Closing form-scroll-body */}
+
               {/* Form Buttons */}
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", borderTop: "1px solid var(--border-color)", paddingTop: "12px", marginTop: "8px" }}>
+              <div className="form-footer-buttons" style={{ flexShrink: 0, display: "flex", justifyContent: "flex-end", gap: "12px", borderTop: "1px solid var(--border-color)", paddingTop: "12px", marginTop: "8px" }}>
                 <button
                   type="button"
                   onClick={() => setIsFormModalOpen(false)}

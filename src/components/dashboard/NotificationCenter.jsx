@@ -165,7 +165,7 @@ export default function NotificationCenter({
                 </span>
               )}
             </div>
-            <div style={{ display: "flex", gap: "12px" }}>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "flex-end" }}>
               {unreadCount > 0 && (
                 <button
                   onClick={onMarkAllRead}
